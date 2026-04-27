@@ -1069,6 +1069,53 @@
       0% { transform: scale(0) translateY(20px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
+    @keyframes furnitureGlow {
+      0% { box-shadow: 0 0 0px 0px rgba(255, 215, 0, 0.8); }
+      50% { box-shadow: 0 0 20px 8px rgba(255, 215, 0, 0.5); }
+      100% { box-shadow: 0 0 0px 0px rgba(255, 215, 0, 0); }
+    }
+    @keyframes goldFly {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    }
+    @keyframes tvFlash {
+      0%, 100% { filter: brightness(1) saturate(1); }
+      25% { filter: brightness(1.6) saturate(1.5) hue-rotate(15deg); }
+      50% { filter: brightness(1.2) saturate(0.8); }
+      75% { filter: brightness(1.5) saturate(1.3) hue-rotate(-10deg); }
+    }
+    @keyframes soundWave {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    @keyframes fridgeDoor {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(-30deg); }
+    }
+    @keyframes wobbleShake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+    @keyframes fishSwim {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(8px); }
+      100% { transform: translateX(0); }
+    }
+    @keyframes pianoKey {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(3px); }
+    }
+    .furniture-animating.tv-flash { animation: tvFlash 0.4s ease-in-out 3; }
+    .furniture-animating.speaker-wave::after {
+      content: ''; position: absolute; inset: -5px;
+      border: 2px solid var(--pink); border-radius: 50%;
+      animation: soundWave 0.6s ease-out forwards;
+    }
+    .furniture-animating.fridge-shake { animation: wobbleShake 0.15s ease-in-out 4; }
+    .furniture-animating.fish-swim { animation: fishSwim 0.8s ease-in-out 3; }
+    .furniture-animating.piano-key { animation: pianoKey 0.2s ease-in-out 6; }
+    .furniture-slot.glow-effect { animation: furnitureGlow 0.6s ease-out; }
     .drop-indicator {
       position: absolute;
       width: 50px;
@@ -2382,6 +2429,8 @@
       width: 100%;
       text-align: center;
       box-shadow: 0 20px 60px rgba(111,78,55,0.25);
+      max-height: 80vh;
+      overflow-y: auto;
     }
     .modal-icon {
       font-size: 52px;
@@ -2399,6 +2448,8 @@
       color: var(--brown-light);
       margin-bottom: 16px;
       line-height: 1.5;
+      max-height: 55vh;
+      overflow-y: auto;
     }
     .modal .btn {
       margin-top: 4px;
@@ -2660,6 +2711,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- Navigation -->
@@ -2760,16 +2812,15 @@
       { id: 'revive', icon: 'assets/item-revive.png', name: '复活卡', desc: '关卡归零时保护，不降级', type: 'special', noDrop: true },
       { id: 'crown', icon: 'assets/item-crown.png', name: '皇冠', desc: '显示全服排名称号', type: 'special', noDrop: true }
     ];
-
     // 家具 - 分散在不同关卡难度范围内
     const FURNITURE = {
       // 客厅：沙发、电视机、茶几、桌椅、音响、落地灯、地毯
       room1: [
         { id: 'sofa', icon: 'assets/kawaii-sofa.png', name: '柔软沙发', price: 173 },
-        { id: 'tv', icon: 'assets/kawaii-tv.png', name: '大电视', price: 259 },
+        { id: 'tv', icon: 'assets/kawaii-tv.png', name: '大电视', price: 259, animation: 'tv-flash' },
         { id: 'coffeetable', icon: 'assets/kawaii-coffeetable.png', name: '茶几', price: 115 },
         { id: 'chair', icon: 'assets/kawaii-chair.png', name: '椅子', price: 72 },
-        { id: 'speaker', icon: 'assets/kawaii-speaker.png', name: '音响', price: 216 },
+        { id: 'speaker', icon: 'assets/kawaii-speaker.png', name: '音响', price: 216, animation: 'speaker-wave' },
         { id: 'floorlamp', icon: 'assets/kawaii-floorlamp.png', name: '落地灯', price: 101 },
         { id: 'rug', icon: 'assets/kawaii-rug.png', name: '地毯', price: 86 },
         { id: 'plant', icon: 'assets/kawaii-plant.png', name: '绿植', price: 72 }
@@ -2779,12 +2830,12 @@
         { id: 'leather-sofa', icon: 'assets/leather-sofa.png', name: '真皮沙发', price: 3500 },
         { id: 'oil-painting', icon: 'assets/oil-painting.png', name: '油画', price: 2800 },
         { id: 'wine-cabinet', icon: 'assets/wine-cabinet.png', name: '酒柜', price: 4200 },
-        { id: 'aquarium', icon: 'assets/aquarium.png', name: '鱼缸', price: 3600 },
-        { id: 'hifi-speaker', icon: 'assets/hifi-speaker.png', name: 'HiFi音响', price: 5800 }
+        { id: 'aquarium', icon: 'assets/aquarium.png', name: '鱼缸', price: 3600, animation: 'fish-swim' },
+        { id: 'hifi-speaker', icon: 'assets/hifi-speaker.png', name: 'HiFi音响', price: 5800, animation: 'speaker-wave' }
       ],
       // 客厅高价家具
       room1_luxury: [
-        { id: 'grand-piano', icon: 'assets/grand-piano.png', name: '三角钢琴', price: 15800 },
+        { id: 'grand-piano', icon: 'assets/grand-piano.png', name: '三角钢琴', price: 15800, animation: 'piano-key' },
         { id: 'antique-vase', icon: 'assets/antique-vase.png', name: '古董花瓶', price: 8800 },
         { id: 'gold-chandelier', icon: 'assets/crystal-chandelier.png', name: '水晶吊灯', price: 12000 },
         { id: 'tiger-carpet', icon: 'assets/tiger-rug.png', name: '虎皮地毯', price: 6800 },
@@ -2848,7 +2899,7 @@
       // 厨房：厨具、锅碗瓢盆、调料、电器、橱柜
       room4: [
         { id: 'stove', icon: 'assets/kawaii-stove.png', name: '灶台', price: 115 },
-        { id: 'fridge', icon: 'assets/kawaii-fridge.png', name: '冰箱', price: 144 },
+        { id: 'fridge', icon: 'assets/kawaii-fridge.png', name: '冰箱', price: 144, animation: 'fridge-shake' },
         { id: 'cabinet', icon: 'assets/kawaii-cabinet.png', name: '橱柜', price: 130 },
         { id: 'pot', icon: 'assets/kawaii-pot.png', name: '汤锅', price: 51 },
         { id: 'pan', icon: 'assets/kawaii-pan.png', name: '平底锅', price: 44 },
@@ -2874,10 +2925,10 @@
       ],
       // 游戏房：游戏机、光碟、音响、健身器材
       room5: [
-        { id: 'game-console', icon: 'assets/kawaii-game-console.png', name: '游戏机', price: 288 },
+        { id: 'game-console', icon: 'assets/kawaii-game-console.png', name: '游戏机', price: 288, animation: 'tv-flash' },
         { id: 'disc', icon: 'assets/kawaii-disc.png', name: '游戏光碟', price: 72 },
-        { id: 'tv', icon: 'assets/kawaii-game-tv.png', name: '电视', price: 216 },
-        { id: 'speaker', icon: 'assets/kawaii-game-speaker.png', name: '音响', price: 173 },
+        { id: 'tv', icon: 'assets/kawaii-game-tv.png', name: '电视', price: 216, animation: 'tv-flash' },
+        { id: 'speaker', icon: 'assets/kawaii-game-speaker.png', name: '音响', price: 173, animation: 'speaker-wave' },
         { id: 'yoga-mat', icon: 'assets/kawaii-yoga-mat.png', name: '瑜伽垫', price: 58 },
         { id: 'dumbbell', icon: 'assets/kawaii-dumbbell.png', name: '哑铃', price: 86 },
         { id: 'soft-rug', icon: 'assets/kawaii-soft-rug.png', name: '地毯', price: 101 }
@@ -3213,7 +3264,7 @@
         gold: 100,
         pet: { hunger: 80, mood: 70, health: 90 },
         inventory: [],
-        furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
+        furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
         currentLevel: 1,
         capyName: newCapyName
       };
@@ -3238,7 +3289,7 @@
           currentCapyImage: null,
           pet: { hunger: 80, mood: 90, health: 100 },
           inventory: [],
-          furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
+          furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
           currentLevel: 1,
           levelCorrect: 0,
           levelWrong: 0,
@@ -3248,6 +3299,11 @@
         // Ensure capyName is always set (for old saves that don't have it)
         if (!gameState.capyName) {
           gameState.capyName = currentUserId || '小可爱';
+        }
+        // Migration: ensure new fields exist on old saves
+        }
+        }
+        }
         }
       }
       if (data.furniturePositions) {
@@ -3281,7 +3337,7 @@
       currentCapyImage: null, // Current capybara image from gallery
       pet: { hunger: 80, mood: 90, health: 100 },
       inventory: [],
-      furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
+      furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
       currentLevel: 1,
       levelCorrect: 0,
       levelWrong: 0
@@ -3306,7 +3362,7 @@
       }
       // Ensure gameState exists
       if (!gameState) {
-        gameState = { room: 1, capybaraLocation: 1, gold: 100, pet: { hunger: 80, mood: 70, health: 90 }, inventory: [], furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } };
+        gameState = { room: 1, capybaraLocation: 1, gold: 100, pet: { hunger: 80, mood: 70, health: 90 }, inventory: [], furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } } };
       }
       // Randomize capybara location on first load or if not set
       if (!gameState.capybaraLocation || gameState.capybaraLocation < 1 || gameState.capybaraLocation > 6) {
@@ -4785,6 +4841,10 @@
       gameState.levelWrong = 0;
       levelQuestionCount = 0;
 
+      // Achievement checks
+      if (allCorrect) {
+      }
+
       renderMap();
       saveGame();
     }
@@ -4868,6 +4928,7 @@
         gameState.inventory.push(item.id);
         updateGoldDisplay();
         renderInventory();
+
         saveGame();
         const icon = item.type === 'food' ? '🍽️' : '🎁';
         showModal('🎉 购买成功！', `获得了 ${item.name}，去背包看看吧！`, icon);
@@ -5285,6 +5346,20 @@
         updateGoldDisplay();
         renderRoom();
         renderDecorGrid();
+
+        // Achievement checks
+        const totalFurniture = Object.values(gameState.furniture).reduce((s, arr) => s + arr.length, 0);
+
+        // Glow effect on latest furniture slot
+        setTimeout(() => {
+          const slots = document.querySelectorAll(`#furniture-grid-${currentDecorRoom} .furniture-slot`);
+          const lastSlot = slots[slots.length - 1];
+          if (lastSlot) {
+            lastSlot.classList.add('glow-effect');
+            setTimeout(() => lastSlot.classList.remove('glow-effect'), 700);
+          }
+        }, 50);
+
         saveGame();
         showModal('🎉 放置成功！', `${item.name} 已添加到 ${roomName}！`, '🪑');
       });
@@ -5510,6 +5585,23 @@
         const sellHandle = item.parentElement.querySelector('.sell-handle');
         if (handle) handle.classList.add('visible');
         if (sellHandle) sellHandle.classList.add('visible');
+
+        // Trigger furniture animation if it has one
+        const room = parseInt(item.dataset.room);
+        const furnitureId = item.dataset.furnitureId;
+        const allItems = [
+          ...(FURNITURE[`room${room}`] || []),
+          ...(FURNITURE[`room${room}_mid`] || []),
+          ...(FURNITURE[`room${room}_luxury`] || [])
+        ];
+        const fItem = allItems.find(f => f.id === furnitureId);
+        if (fItem?.animation && item.classList.contains('furniture-animating')) return;
+        if (fItem?.animation) {
+          item.classList.add('furniture-animating', fItem.animation);
+          setTimeout(() => {
+            item.classList.remove('furniture-animating', fItem.animation);
+          }, 2000);
+        }
       }
     }
 
@@ -6412,6 +6504,7 @@
       document.getElementById('gold-amount').textContent = gameState.gold;
     }
 
+
     function updatePetStatus() {
       gameState.pet.hunger = Math.max(0, gameState.pet.hunger - 2);
       gameState.pet.mood = Math.max(0, gameState.pet.mood - 1);
@@ -6425,6 +6518,16 @@
       updateCapybaraMood();
       saveGame();
     }
+
+    // ============ PET INTERACTIONS ============
+
+      // Daily task tracking
+
+      updateStatusBars();
+      updateCapybaraMood();
+      saveGame();
+    }
+
 
     // ============ PERSISTENCE ============
     function saveGame() {
@@ -6489,10 +6592,15 @@
     }
 
     // ============ MODALS & TOASTS ============
-    function showModal(title, desc, icon = '🎉', onConfirm = null) {
+    function showModal(title, desc, icon = '🎉', onConfirm = null, descIsHtml = false) {
       document.getElementById('modal-icon').textContent = icon;
       document.getElementById('modal-title').textContent = title;
-      document.getElementById('modal-desc').textContent = desc;
+      const descEl = document.getElementById('modal-desc');
+      if (descIsHtml) {
+        descEl.innerHTML = desc;
+      } else {
+        descEl.textContent = desc;
+      }
 
       const actions = document.getElementById('modal-actions');
       const closeBtn = document.getElementById('modal-close');
