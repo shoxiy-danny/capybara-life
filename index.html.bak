@@ -1,0 +1,3302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>卡皮巴拉闯关世界</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1f2b4d;
+      --accent: #e94560;
+      --accent2: #0f3460;
+      --text: #eaeaea;
+      --text-dim: #8892a0;
+      --gold: #ffd700;
+      --hunger: #ff6b6b;
+      --mood: #4ecdc4;
+      --health: #95e1d3;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-card);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--accent2);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gold-display {
+      background: linear-gradient(135deg, var(--gold), #ffa500);
+      color: #1a1a2e;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Room Container */
+    .room-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+    }
+
+    .room-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .room-bg canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Room scenes */
+    .room-scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+
+    .room-scene.active {
+      display: block;
+    }
+
+    /* Window frame */
+    .window-frame {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 40%;
+      background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+      border: 8px solid #5d4e37;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .window-sky {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Room 1 - Living Room */
+    .room-1 .floor {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 35%;
+      background: repeating-linear-gradient(
+        90deg,
+        #8B7355 0px,
+        #8B7355 30px,
+        #7a6548 30px,
+        #7a6548 60px
+      );
+    }
+
+    /* Room 2 - Bedroom */
+    .room-2 .floor {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 35%;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2d20 100%);
+    }
+
+    .room-2 .wall {
+      position: absolute;
+      bottom: 35%;
+      width: 100%;
+      height: 55%;
+      background: linear-gradient(180deg, #3d5a6e 0%, #2d4352 100%);
+    }
+
+    /* Room 3 - Outdoor Pond */
+    .room-3 .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(180deg, #7cb342 0%, #558b2f 100%);
+    }
+
+    .room-3 .pond {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 25%;
+      background: linear-gradient(180deg, #4fc3f7 0%, #0288d1 100%);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .room-3 .pond::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: repeating-linear-gradient(
+        90deg,
+      transparent 0px,
+      rgba(255,255,255,0.1) 2px,
+      transparent 4px
+      );
+      animation: pondWave 3s linear infinite;
+    }
+
+    @keyframes pondWave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(50%); }
+    }
+
+    /* Furniture */
+    .furniture-area {
+      position: absolute;
+      bottom: 10%;
+      left: 0;
+      width: 100%;
+      height: 40%;
+    }
+
+    /* Furniture grid for drag & drop */
+    .furniture-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .furniture-slot {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .furniture-item {
+      font-size: 48px;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+      animation: furnitureAppear 0.3s ease-out;
+      transition: transform 0.15s, filter 0.15s;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .furniture-item:hover {
+      transform: scale(1.2);
+      filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.6));
+    }
+
+    .furniture-item.dragging {
+      cursor: grabbing;
+      transform: scale(1.4);
+      z-index: 1000;
+      filter: drop-shadow(6px 6px 12px rgba(0,0,0,0.7));
+      opacity: 0.9;
+    }
+
+    .furniture-item.selected {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    /* Resize handle */
+    .resize-handle {
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: nwse-resize;
+      z-index: 1001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .resize-handle.visible {
+      display: flex;
+    }
+
+    @keyframes furnitureAppear {
+      0% { transform: scale(0) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* Drop indicator */
+    .drop-indicator {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border: 2px dashed var(--accent);
+      border-radius: 50%;
+      background: rgba(233, 69, 96, 0.2);
+      pointer-events: none;
+      display: none;
+      z-index: 999;
+    }
+
+    .drop-indicator.visible {
+      display: block;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Room Switcher */
+    .room-switcher {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 30;
+    }
+
+    .room-switch-btn {
+      background: rgba(22, 33, 62, 0.9);
+      border: 2px solid var(--accent2);
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .room-switch-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Capybara */
+    .capybara-container {
+      position: absolute;
+      bottom: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      cursor: grab;
+    }
+
+    .capybara-container.dragging {
+      cursor: grabbing;
+      z-index: 1000;
+    }
+
+    .capybara-container.dragging .capybara {
+      transform: scale(1.1);
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+    }
+
+    .capybara {
+      position: relative;
+      width: 100px;
+      height: 85px;
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .capybara.blink .eye {
+      animation: blink 0.15s ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.1); }
+    }
+
+    .capybara.shake {
+      animation: shake 0.5s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+
+    .capybara.wobble {
+      animation: wobble 2s ease-in-out infinite;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+
+    .capybara.eating {
+      animation: eating 0.3s ease-in-out 3;
+    }
+
+    @keyframes eating {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05) translateY(-5px); }
+    }
+
+    .capybara.sad .mouth {
+      border-radius: 50% 50% 0 0;
+      transform: translateY(3px);
+    }
+
+    .capybara.sick {
+      animation: sick 1s ease-in-out infinite;
+    }
+
+    @keyframes sick {
+      0%, 100% { transform: translateX(0) rotate(0); }
+      25% { transform: translateX(-2px) rotate(-2deg); }
+      75% { transform: translateX(2px) rotate(2deg); }
+    }
+
+    .capybara.sleeping {
+      animation: sleeping 2s ease-in-out infinite;
+    }
+
+    @keyframes sleeping {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.98); }
+    }
+
+    /* Capybara PINK body parts - Cute round style */
+    .capy-body {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 55px;
+      background: linear-gradient(180deg, #FFB6C1 20%, #FF69B4 100%);
+      border-radius: 45px 45px 35px 35px;
+      box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), inset 5px 5px 15px rgba(255,255,255,0.3);
+    }
+
+    .capy-head {
+      position: absolute;
+      bottom: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 75px;
+      height: 52px;
+      background: linear-gradient(180deg, #FFC0CB 0%, #FF69B4 100%);
+      border-radius: 38px 38px 30px 30px;
+      box-shadow: inset -3px -3px 10px rgba(0,0,0,0.08), inset 3px 3px 10px rgba(255,255,255,0.4);
+    }
+
+    .capy-ear {
+      position: absolute;
+      top: -10px;
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(180deg, #FFB6C1 0%, #FF69B4 100%);
+      border-radius: 50%;
+      box-shadow: inset -2px -2px 5px rgba(0,0,0,0.1);
+    }
+
+    .capy-ear.left { left: 6px; }
+    .capy-ear.right { right: 6px; }
+
+    .capy-ear::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background: #FF85A2;
+      border-radius: 50%;
+    }
+
+    .capy-eye {
+      position: absolute;
+      top: 14px;
+      width: 14px;
+      height: 16px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .capy-eye.left { left: 16px; }
+    .capy-eye.right { right: 16px; }
+
+    .capy-eye::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 5px;
+      height: 5px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .capy-eye.happy {
+      height: 6px;
+      top: 20px;
+      border-radius: 0 0 50% 50%;
+    }
+
+    .capy-eye.sad::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: #FF69B4;
+    }
+
+    .capy-nose {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 16px;
+      background: linear-gradient(180deg, #FF85A2 0%, #E75480 100%);
+      border-radius: 50%;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.15);
+    }
+
+    .capy-mouth {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 5px;
+      border: 2px solid #E75480;
+      border-top: none;
+      border-radius: 0 0 50% 50%;
+    }
+
+    .capy-blush {
+      position: absolute;
+      top: 24px;
+      width: 14px;
+      height: 8px;
+      background: rgba(255, 150, 180, 0.6);
+      border-radius: 50%;
+    }
+
+    .capy-blush.left { left: 3px; }
+    .capy-blush.right { right: 3px; }
+
+    /* Status bars */
+    .status-container {
+      background: var(--bg-card);
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--accent2);
+    }
+
+    .status-bar {
+      flex: 1;
+      text-align: center;
+    }
+
+    .status-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .status-track {
+      height: 8px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .status-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .status-fill.hunger { background: var(--hunger); }
+    .status-fill.mood { background: var(--mood); }
+    .status-fill.health { background: var(--health); }
+
+    /* Navigation */
+    .nav {
+      background: var(--bg-card);
+      display: flex;
+      border-top: 1px solid var(--accent2);
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 12px 8px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-btn.active {
+      color: var(--accent);
+      background: var(--accent2);
+    }
+
+    .nav-btn span:first-child {
+      font-size: 20px;
+    }
+
+    /* Panels */
+    .panel {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      padding: 16px;
+      padding-top: 60px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Math Challenge */
+    .math-card {
+      background: var(--bg-dark);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .math-question {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .math-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .math-option {
+      background: var(--bg-card);
+      border: 2px solid var(--accent2);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 20px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .math-option:hover {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    .math-option.correct {
+      background: #2e7d32;
+      border-color: #4caf50;
+    }
+
+    .math-option.wrong {
+      background: #c62828;
+      border-color: #f44336;
+    }
+
+    .math-progress {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .math-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg-dark);
+    }
+
+    .math-dot.done { background: #4caf50; }
+    .math-dot.wrong { background: #f44336; }
+    .math-dot.current { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+    .math-result {
+      text-align: center;
+      padding: 32px;
+    }
+
+    .math-result h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .math-subtitle {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    .math-reward {
+      font-size: 32px;
+      color: var(--gold);
+      margin: 16px 0;
+    }
+
+    .math-detail {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    /* Level Map */
+    .level-map-container {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .level-map {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .map-zone {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      opacity: 0.5;
+      transition: all 0.3s;
+    }
+
+    .map-zone.current {
+      opacity: 1;
+      background: var(--accent2);
+      transform: scale(1.1);
+    }
+
+    .map-zone.passed {
+      opacity: 0.7;
+      background: #2e7d32;
+    }
+
+    .map-zone-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .map-zone-name {
+      font-size: 10px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .map-zone-range {
+      font-size: 8px;
+      color: var(--text-dim);
+    }
+
+    .current-level-indicator {
+      text-align: center;
+      font-size: 14px;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    .level-info {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .level-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      padding: 8px;
+    }
+
+    /* Shop */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .shop-item {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .shop-item:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    .shop-item.owned {
+      border-color: #4caf50;
+      opacity: 0.7;
+    }
+
+    .shop-item-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .shop-item-name {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .shop-item-price {
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    .shop-item-effect {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Room Decor */
+    .room-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .room-tab {
+      flex: 1;
+      padding: 10px;
+      background: var(--bg-dark);
+      border: none;
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .room-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .decor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .decor-item {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .decor-item:hover {
+      border-color: var(--accent2);
+    }
+
+    .decor-item.placed {
+      border-color: #4caf50;
+      opacity: 0.6;
+    }
+
+    .decor-item-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .decor-item-name {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .decor-item-price {
+      color: var(--gold);
+      font-size: 11px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Inventory */
+    .inventory-section {
+      margin-top: 16px;
+    }
+
+    .inventory-title {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .inventory-grid {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .inventory-item {
+      background: var(--bg-dark);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .inventory-item:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .inventory-item span:first-child {
+      font-size: 20px;
+    }
+
+    .inventory-item span:last-child {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Level selector */
+    .level-section {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .level-title {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .level-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .level-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--accent2);
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .level-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .level-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Floating food animation */
+    .floating-food {
+      position: absolute;
+      font-size: 24px;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 100;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-50px) scale(0.5); }
+    }
+
+    /* Zzz animation */
+    .zzz {
+      position: absolute;
+      top: -20px;
+      right: -10px;
+      font-size: 16px;
+      color: var(--text-dim);
+      animation: zzzFloat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes zzzFloat {
+      0%, 100% { opacity: 0.5; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-10px); }
+    }
+
+    /* Bubbles */
+    .bubble {
+      position: absolute;
+      font-size: 14px;
+      animation: bubbleFloat 2s ease-out forwards;
+      color: var(--mood);
+    }
+
+    @keyframes bubbleFloat {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+
+    /* Message toast */
+    .toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--accent);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: toastIn 0.3s ease-out;
+    }
+
+    @keyframes toastIn {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 20000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>🏠 卡皮巴拉之家</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="sync-btn" style="background:var(--accent2);border:none;border-radius:12px;padding:6px 10px;color:var(--text);font-size:12px;cursor:pointer;">📦 存档</button>
+      <div class="gold-display">🪙 <span id="gold-amount">100</span></div>
+    </div>
+  </div>
+
+  <!-- Room Container -->
+  <div class="room-container">
+    <!-- Room Switcher -->
+    <div class="room-switcher">
+      <button class="room-switch-btn active" data-room="1">🏠客厅</button>
+      <button class="room-switch-btn" data-room="2">🛏️卧室</button>
+      <button class="room-switch-btn" data-room="3">🌿户外</button>
+    </div>
+
+    <!-- Room 1 - Living Room -->
+    <div class="room-scene room-1 active" id="room-1">
+      <div class="window-frame">
+        <canvas id="sky-1" class="window-sky"></canvas>
+      </div>
+      <div class="floor"></div>
+      <div class="furniture-area" id="furniture-room1"></div>
+      <div class="capybara-container">
+        <div class="capybara" id="capybara">
+          <div class="zzz" id="zzz" style="display:none;">Zzz</div>
+          <div class="capy-head">
+            <div class="capy-ear left"></div>
+            <div class="capy-ear right"></div>
+            <div class="capy-eye left" id="eye-left"></div>
+            <div class="capy-eye right" id="eye-right"></div>
+            <div class="capy-blush left"></div>
+            <div class="capy-blush right"></div>
+            <div class="capy-nose"></div>
+            <div class="capy-mouth" id="mouth"></div>
+          </div>
+          <div class="capy-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room 2 - Bedroom -->
+    <div class="room-scene room-2" id="room-2">
+      <div class="wall"></div>
+      <div class="window-frame">
+        <canvas id="sky-2" class="window-sky"></canvas>
+      </div>
+      <div class="floor"></div>
+      <div class="furniture-area" id="furniture-room2"></div>
+      <div class="capybara-container">
+        <div class="capybara" id="capybara-2">
+          <div class="zzz" id="zzz-2" style="display:none;">Zzz</div>
+          <div class="capy-head">
+            <div class="capy-ear left"></div>
+            <div class="capy-ear right"></div>
+            <div class="capy-eye left"></div>
+            <div class="capy-eye right"></div>
+            <div class="capy-blush left"></div>
+            <div class="capy-blush right"></div>
+            <div class="capy-nose"></div>
+            <div class="capy-mouth"></div>
+          </div>
+          <div class="capy-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room 3 - Outdoor -->
+    <div class="room-scene room-3" id="room-3">
+      <canvas id="sky-3" class="room-bg"></canvas>
+      <div class="ground"></div>
+      <div class="pond" id="default-pond"></div>
+      <div class="furniture-area" id="furniture-room3"></div>
+      <div class="capybara-container">
+        <div class="capybara" id="capybara-3">
+          <div class="zzz" id="zzz-3" style="display:none;">Zzz</div>
+          <div class="capy-head">
+            <div class="capy-ear left"></div>
+            <div class="capy-ear right"></div>
+            <div class="capy-eye left"></div>
+            <div class="capy-eye right"></div>
+            <div class="capy-blush left"></div>
+            <div class="capy-blush right"></div>
+            <div class="capy-nose"></div>
+            <div class="capy-mouth"></div>
+          </div>
+          <div class="capy-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Math Challenge Panel -->
+    <div class="panel" id="panel-math">
+      <div class="panel-title">🧮 数学闯关</div>
+
+      <!-- Level Map -->
+      <div class="level-map-container">
+        <div class="level-map" id="level-map"></div>
+        <div class="current-level-indicator" id="current-level-indicator">第1关</div>
+      </div>
+
+      <div class="level-section">
+        <div class="level-info" id="level-info">第1关 · 练习场</div>
+        <div class="level-btns" id="level-btns"></div>
+      </div>
+
+      <div class="math-progress" id="math-progress"></div>
+
+      <div class="math-card" id="math-card">
+        <div class="math-question" id="math-question">准备开始...</div>
+        <div class="math-options" id="math-options"></div>
+      </div>
+
+      <div class="math-result" id="math-result" style="display:none;">
+        <h3 id="result-title">闯关完成！</h3>
+        <div class="math-subtitle" id="result-subtitle"></div>
+        <div class="math-reward" id="result-reward">+0 🪙</div>
+        <div class="math-detail" id="result-detail"></div>
+        <button class="btn" id="restart-btn">再来一轮</button>
+      </div>
+    </div>
+
+    <!-- Shop Panel -->
+    <div class="panel" id="panel-shop">
+      <div class="panel-title">🛒 商店</div>
+      <div class="shop-grid" id="shop-grid"></div>
+
+      <div class="inventory-section">
+        <div class="inventory-title">背包</div>
+        <div class="inventory-grid" id="inventory-grid">
+          <span style="color: var(--text-dim); font-size: 12px;">空空如也</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decor Panel -->
+    <div class="panel" id="panel-decor">
+      <div class="panel-title">🏠 装修房间</div>
+
+      <div class="room-tabs" id="room-tabs"></div>
+
+      <div class="decor-grid" id="decor-grid"></div>
+    </div>
+  </div>
+
+  <!-- Status Bars -->
+  <div class="status-container">
+    <div class="status-bar">
+      <div class="status-label">🍖 饥饿</div>
+      <div class="status-track">
+        <div class="status-fill hunger" id="hunger-bar" style="width: 100%"></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-label">😊 心情</div>
+      <div class="status-track">
+        <div class="status-fill mood" id="mood-bar" style="width: 100%"></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-label">💚 健康</div>
+      <div class="status-track">
+        <div class="status-fill health" id="health-bar" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button class="nav-btn active" data-panel="room">
+      <span>🐹</span>
+      <span>宠物</span>
+    </button>
+    <button class="nav-btn" data-panel="math">
+      <span>🧮</span>
+      <span>闯关</span>
+    </button>
+    <button class="nav-btn" data-panel="shop">
+      <span>🛒</span>
+      <span>商店</span>
+    </button>
+    <button class="nav-btn" data-panel="decor">
+      <span>🏠</span>
+      <span>装修</span>
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-icon" id="modal-icon">🎉</div>
+      <div class="modal-title" id="modal-title">购买成功</div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <button class="btn" id="modal-close">确定</button>
+    </div>
+  </div>
+
+  <!-- Sync Modal -->
+  <div class="modal" id="sync-modal">
+    <div class="modal-content">
+      <div class="modal-icon">☁️</div>
+      <div class="modal-title">存档同步</div>
+      <div class="modal-desc">
+        <input type="text" id="user-id-input" placeholder="输入至少4位ID（记住它）" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--accent2);background:var(--bg-dark);color:var(--text);font-size:14px;margin-bottom:12px;text-align:center;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="sync-save-btn" style="flex:1;">Save</button>
+          <button class="btn" id="sync-load-btn" style="flex:1;background:var(--accent2);">Load</button>
+        </div>
+        <div id="sync-status" style="margin-top:12px;font-size:12px;color:var(--text-dim);"></div>
+      </div>
+      <button class="btn" id="sync-close" style="margin-top:12px;background:var(--accent2);">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    // ============ GAME DATA ============
+    // 道具商店 - 价格与关卡金币奖励匹配 (练习场10-50, 洞穴25-90, 巢穴45-145, 城堡70-220, 寒极110-340)
+    const SHOP_ITEMS = [
+      // 食物类
+      { id: 'carrot', icon: '🥕', name: '胡萝卜', price: 15, effect: { hunger: 15 }, type: 'food' },
+      { id: 'grass', icon: '🌿', name: '新鲜草料', price: 30, effect: { hunger: 35, mood: 5 }, type: 'food' },
+      { id: 'pumpkin', icon: '🎃', name: '南瓜饼', price: 55, effect: { hunger: 60 }, type: 'food' },
+      { id: 'roastchicken', icon: '🍗', name: '烤鸡', price: 100, effect: { hunger: 100, mood: 10 }, type: 'food' },
+      { id: 'sushi', icon: '🍣', name: '寿司拼盘', price: 160, effect: { hunger: 120, mood: 20 }, type: 'food' },
+      { id: 'lobster', icon: '🦞', name: '龙虾大餐', price: 280, effect: { hunger: 150, mood: 40, health: 20 }, type: 'food' },
+      // 心情道具
+      { id: 'musicbox', icon: '🎵', name: '音乐盒', price: 90, effect: { mood: 55 }, type: 'item' },
+      { id: 'yarnball', icon: '🧶', name: '逗宠毛线球', price: 130, effect: { mood: 75 }, type: 'item' },
+      { id: 'book', icon: '📚', name: '故事绘本', price: 200, effect: { mood: 110 }, type: 'item' },
+      { id: 'fairy', icon: '✨', name: '小精灵伙伴', price: 380, effect: { mood: 160 }, type: 'item' },
+      // 健康道具
+      { id: 'hotspring', icon: '♨️', name: '温泉券', price: 90, effect: { health: 40 }, type: 'item' },
+      { id: 'sunlamp', icon: '💡', name: '阳光灯', price: 140, effect: { health: 60 }, type: 'item' },
+      { id: 'energy', icon: '⚡', name: '能量饮料', price: 200, effect: { health: 80, mood: 25 }, type: 'item' },
+      { id: 'royal', icon: '👑', name: '皇家御医', price: 450, effect: { health: 120, mood: 40 }, type: 'item' }
+    ];
+
+    // 家具 - 分散在不同关卡难度范围内
+    const FURNITURE = {
+      room1: [
+        { id: 'rug', icon: '🧶', name: '地毯', price: 40 },
+        { id: 'plant', icon: '🪴', name: '绿植', price: 60 },
+        { id: 'sofa', icon: '🛋️', name: '柔软沙发', price: 120 },
+        { id: 'tv', icon: '📺', name: '大电视', price: 180 },
+        { id: 'aquarium', icon: '🐠', name: '鱼缸', price: 250 },
+        { id: 'piano', icon: '🎹', name: '钢琴', price: 400 }
+      ],
+      room2: [
+        { id: 'nightstand', icon: '🪵', name: '床头柜', price: 50 },
+        { id: 'lamp', icon: '💡', name: '小台灯', price: 70 },
+        { id: 'bed', icon: '🛏️', name: '舒适大床', price: 150 },
+        { id: 'painting', icon: '🖼️', name: '装饰画', price: 130 },
+        { id: 'wardrobe', icon: '🚪', name: '衣柜', price: 220 },
+        { id: 'cosmetics', icon: '💄', name: '梳妆台', price: 300 }
+      ],
+      room3: [
+        { id: 'pond', icon: '🐟', name: '小池塘', price: 100 },
+        { id: 'tree', icon: '🌳', name: '乘凉大树', price: 90 },
+        { id: 'table', icon: '🪑', name: '野餐桌', price: 110 },
+        { id: 'swing', icon: '🎢', name: '休闲秋千', price: 160 },
+        { id: 'hammock', icon: '🏖️', name: '吊床', price: 200 },
+        { id: 'gazebo', icon: '⛺', name: '凉亭', price: 350 },
+        { id: 'fountain', icon: '⛲', name: '喷泉', price: 500 }
+      ]
+    };
+
+    const ROOM_NAMES = { room1: '客厅', room2: '卧室', room3: '户外池塘' };
+
+    // ============ LEVEL SYSTEM ============
+    const MAP_NODES = [
+      { id: 'practice', name: '练习场', range: [1, 20], icon: '🌱', color: '#4CAF50' },
+      { id: 'cave', name: '村口洞穴', range: [21, 40], icon: '🪨', color: '#78909C' },
+      { id: 'nest', name: '怪物巢穴', range: [41, 60], icon: '👾', color: '#9C27B0' },
+      { id: 'castle', name: '恶魔城堡', range: [61, 80], icon: '🏰', color: '#C62828' },
+      { id: 'frost', name: '北地寒极', range: [81, 100], icon: '❄️', color: '#4FC3F7' }
+    ];
+
+    // Gold reward config per zone (baseMin, baseMax, perfectBonus)
+    const GOLD_CONFIG = {
+      practice: { min: 10, max: 20, bonus: 30 },
+      cave: { min: 25, max: 40, bonus: 50 },
+      nest: { min: 45, max: 65, bonus: 80 },
+      castle: { min: 70, max: 100, bonus: 120 },
+      frost: { min: 110, max: 160, bonus: 180 }
+    };
+
+    // Grade mapping: level -> grade (1-50: grade3, 51-80: grade4, 81-100: grade5)
+    function getGradeForLevel(level) {
+      if (level <= 50) return 3;
+      if (level <= 80) return 4;
+      return 5;
+    }
+
+    function getZoneForLevel(level) {
+      return MAP_NODES.find(z => level >= z.range[0] && level <= z.range[1]) || MAP_NODES[0];
+    }
+
+    function getGoldReward(level, correct, total = 10) {
+      const zone = getZoneForLevel(level);
+      const config = GOLD_CONFIG[zone.id];
+      const base = config.min + Math.floor(Math.random() * (config.max - config.min + 1));
+      const perfectBonus = correct === total ? config.bonus : 0;
+      return { base, perfectBonus, total: base + perfectBonus };
+    }
+
+    // ============ SOUND EFFECTS (Web Audio API) ============
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, duration, type = 'sine', volume = 0.3) {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    }
+
+    function playCorrectSound() {
+      // High rising tone - "ding"
+      playTone(523, 0.1, 'sine', 0.25); // C5
+      setTimeout(() => playTone(659, 0.1, 'sine', 0.25), 80); // E5
+      setTimeout(() => playTone(784, 0.15, 'sine', 0.25), 160); // G5
+    }
+
+    function playWrongSound() {
+      // Low falling tone - "dong"
+      playTone(200, 0.15, 'square', 0.15);
+      setTimeout(() => playTone(150, 0.3, 'square', 0.12), 100);
+    }
+
+    function playVictorySound() {
+      // Rising arpeggio - "fanfare"
+      const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+      notes.forEach((freq, i) => {
+        setTimeout(() => playTone(freq, 0.2, 'sine', 0.2), i * 120);
+      });
+      setTimeout(() => playTone(1047, 0.4, 'sine', 0.25), 500); // Hold C6
+    }
+
+    // ============ SYNC API ============
+    const API_URL = 'https://cpbl.smartmind.top/api';
+    let currentUserId = localStorage.getItem('capybara_user_id') || '';
+
+    async function syncSave() {
+      const userId = document.getElementById('user-id-input').value.trim();
+      if (!userId || userId.length < 4) {
+        document.getElementById('sync-status').textContent = 'ID至少需要4位字母或数字';
+        return;
+      }
+      document.getElementById('sync-status').textContent = '上传中...';
+      localStorage.setItem('capybara_user_id', userId);
+      currentUserId = userId;
+
+      // Collect all data
+      const saveData = {
+        gameState: gameState,
+        furniturePositions: {
+          room1: loadFurniturePositions(1) || [],
+          room2: loadFurniturePositions(2) || [],
+          room3: loadFurniturePositions(3) || []
+        },
+        capybaraPositions: {
+          room1: JSON.parse(localStorage.getItem('capybara_pos_room1') || '{}'),
+          room2: JSON.parse(localStorage.getItem('capybara_pos_room2') || '{}'),
+          room3: JSON.parse(localStorage.getItem('capybara_pos_room3') || '{}')
+        }
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, data: saveData })
+        });
+        const result = await res.json();
+        document.getElementById('sync-status').textContent = result.success ? '上传成功！' : '上传失败: ' + result.error;
+      } catch (e) {
+        document.getElementById('sync-status').textContent = '上传失败: ' + e.message;
+      }
+    }
+
+    async function syncLoad() {
+      const userId = document.getElementById('user-id-input').value.trim();
+      if (!userId || userId.length < 4) {
+        document.getElementById('sync-status').textContent = 'ID至少需要4位字母或数字';
+        return;
+      }
+      document.getElementById('sync-status').textContent = '下载中...';
+      localStorage.setItem('capybara_user_id', userId);
+      currentUserId = userId;
+
+      try {
+        const res = await fetch(`${API_URL}/load?user_id=${encodeURIComponent(userId)}`);
+        const result = await res.json();
+        if (!result.success || !result.data) {
+          document.getElementById('sync-status').textContent = '存档不存在';
+          return;
+        }
+
+        const saveData = result.data;
+
+        // Restore game state
+        if (saveData.gameState) {
+          gameState = { ...gameState, ...saveData.gameState };
+          updateGoldDisplay();
+          updateStatusBars();
+          renderInventory();
+          renderDecor();
+          renderLevelBtns();
+          renderMap();
+        }
+
+        // Restore furniture positions
+        if (saveData.furniturePositions) {
+          for (let i = 1; i <= 3; i++) {
+            if (saveData.furniturePositions[`room${i}`]) {
+              saveFurniturePositions(i, saveData.furniturePositions[`room${i}`]);
+            }
+          }
+        }
+
+        // Restore capybara positions
+        if (saveData.capybaraPositions) {
+          for (let i = 1; i <= 3; i++) {
+            if (saveData.capybaraPositions[`room${i}`]) {
+              localStorage.setItem(`capybara_pos_room${i}`, JSON.stringify(saveData.capybaraPositions[`room${i}`]));
+            }
+          }
+        }
+
+        renderRoom();
+        updateCapybaraMood();
+        saveGame();
+        document.getElementById('sync-status').textContent = '下载成功！';
+      } catch (e) {
+        document.getElementById('sync-status').textContent = '下载失败: ' + e.message;
+      }
+    }
+
+    // ============ GAME STATE ============
+    let gameState = {
+      gold: 100,
+      room: 1,
+      pet: { hunger: 80, mood: 90, health: 100 },
+      inventory: [],
+      furniture: { room1: [], room2: [], room3: [] },
+      currentLevel: 1,
+      levelCorrect: 0,
+      levelWrong: 0
+    };
+
+    let currentMath = { question: '', answer: 0, options: [], index: 0, correct: 0 };
+    let levelQuestionCount = 0; // Track questions answered in current level
+    let levelAnswers = []; // Track each answer: true=correct, false=wrong
+    let currentDecorRoom = 1;
+    let zIndexCounter = 1000;
+
+    // ============ INITIALIZATION ============
+    function init() {
+      loadGame();
+      setupCanvas();
+      renderRoom();
+      renderInventory();
+      renderShop();
+      renderDecor();
+      renderLevelBtns();
+      renderMap();
+      updateStatusBars();
+      updateCapybaraMood();
+
+      // Start timers
+      setInterval(updatePetStatus, 30000);
+      setInterval(blinkCapybara, 4000);
+      setInterval(saveGame, 10000);
+
+      // Event listeners
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchPanel(btn.dataset.panel));
+      });
+
+      // Room switcher buttons
+      document.querySelectorAll('.room-switch-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchRoom(parseInt(btn.dataset.room)));
+      });
+
+      document.getElementById('restart-btn').addEventListener('click', () => {
+        gameState.levelCorrect = 0;
+        gameState.levelWrong = 0;
+        levelQuestionCount = 0;
+        startMathChallenge();
+      });
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+
+      // Sync modal
+      document.getElementById('sync-btn').addEventListener('click', () => {
+        document.getElementById('user-id-input').value = currentUserId;
+        document.getElementById('sync-status').textContent = '';
+        document.getElementById('sync-modal').classList.add('active');
+      });
+      document.getElementById('sync-close').addEventListener('click', () => {
+        document.getElementById('sync-modal').classList.remove('active');
+      });
+      document.getElementById('sync-save-btn').addEventListener('click', syncSave);
+      document.getElementById('sync-load-btn').addEventListener('click', syncLoad);
+
+      // Capybara drag
+      setupCapybaraDrag();
+
+      // Show level selection
+      startMathChallenge();
+    }
+
+    // ============ CAPYBARA DRAG ============
+    function setupCapybaraDrag() {
+      document.querySelectorAll('.capybara-container').forEach(container => {
+        container.addEventListener('mousedown', handleCapyDragStart);
+        container.addEventListener('touchstart', handleCapyDragStart, { passive: false });
+      });
+    }
+
+    let capyDragState = {
+      active: false,
+      container: null,
+      room: null,
+      startX: 0,
+      startY: 0,
+      startLeft: 0,
+      startBottom: 0
+    };
+
+    function handleCapyDragStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const container = e.target.closest('.capybara-container');
+      if (!container) return;
+
+      // Determine room from container
+      const room = container.id.includes('2') ? 2 : container.id.includes('3') ? 3 : 1;
+
+      const touch = e.touches ? e.touches[0] : e;
+      const rect = container.getBoundingClientRect();
+
+      // Get position as percentage
+      const gridRect = container.parentElement.getBoundingClientRect();
+      const leftPct = (rect.left - gridRect.left) / gridRect.width * 100;
+      const bottomPct = (1 - (rect.bottom - gridRect.top) / gridRect.height) * 100;
+
+      capyDragState = {
+        active: true,
+        container: container,
+        room: room,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startLeft: leftPct,
+        startBottom: bottomPct
+      };
+
+      // Bring to top immediately
+      zIndexCounter++;
+      container.style.zIndex = 10000 + zIndexCounter;
+
+      container.classList.add('dragging');
+
+      document.addEventListener('mousemove', handleCapyDragMove);
+      document.addEventListener('mouseup', handleCapyDragEnd);
+      document.addEventListener('touchmove', handleCapyDragMove, { passive: false });
+      document.addEventListener('touchend', handleCapyDragEnd);
+    }
+
+    function handleCapyDragMove(e) {
+      if (!capyDragState.active) return;
+      e.preventDefault();
+
+      const touch = e.touches ? e.touches[0] : e;
+      const gridRect = capyDragState.container.parentElement.getBoundingClientRect();
+
+      const deltaX = touch.clientX - capyDragState.startX;
+      const deltaY = capyDragState.startY - touch.clientY; // inverted because bottom grows up
+
+      const newLeft = capyDragState.startLeft + (deltaX / gridRect.width) * 100;
+      const newBottom = Math.max(5, Math.min(75, capyDragState.startBottom + (deltaY / gridRect.height) * 100));
+
+      capyDragState.container.style.left = newLeft + '%';
+      capyDragState.container.style.bottom = newBottom + '%';
+      capyDragState.container.style.transform = 'none';
+    }
+
+    function handleCapyDragEnd() {
+      if (!capyDragState.active) return;
+
+      // Set high z-index BEFORE removing dragging class
+      zIndexCounter++;
+      capyDragState.container.style.zIndex = 10000 + zIndexCounter;
+
+      capyDragState.container.classList.remove('dragging');
+
+      // Save position to localStorage
+      const room = capyDragState.room;
+      const left = capyDragState.container.style.left;
+      const bottom = capyDragState.container.style.bottom;
+      localStorage.setItem(`capybara_pos_room${room}`, JSON.stringify({ left, bottom }));
+
+      capyDragState.active = false;
+
+      document.removeEventListener('mousemove', handleCapyDragMove);
+      document.removeEventListener('mouseup', handleCapyDragEnd);
+      document.removeEventListener('touchmove', handleCapyDragMove);
+      document.removeEventListener('touchend', handleCapyDragEnd);
+    }
+
+    // ============ CANVAS BACKGROUNDS ============
+    function setupCanvas() {
+      setupWindowAnims();
+      setupOutdoorAnim();
+    }
+
+    // ============ WINDOW ANIMATIONS ============
+    let windowAnims = {
+      running: false,
+      sky1Clouds: [],
+      sky2Clouds: [],
+      sky1Birds: [],
+      sky2Birds: [],
+      sky2Stars: [],
+      phase: 0,
+      lastPhase: -1
+    };
+
+    function setupWindowAnims() {
+      // Initialize sky1 clouds
+      for (let i = 0; i < 3; i++) {
+        windowAnims.sky1Clouds.push({
+          x: Math.random() * 120 - 10,
+          y: 10 + Math.random() * 20,
+          size: 8 + Math.random() * 10,
+          speed: 0.1 + Math.random() * 0.1
+        });
+      }
+      // Initialize sky2 clouds
+      for (let i = 0; i < 2; i++) {
+        windowAnims.sky2Clouds.push({
+          x: Math.random() * 120 - 10,
+          y: 8 + Math.random() * 15,
+          size: 6 + Math.random() * 8,
+          speed: 0.08 + Math.random() * 0.08
+        });
+      }
+      // Initialize sky2 stars
+      for (let i = 0; i < 20; i++) {
+        windowAnims.sky2Stars.push({
+          x: Math.random() * 100,
+          y: Math.random() * 60,
+          size: 0.5 + Math.random() * 1,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+      // Birds spawn every 6 seconds
+      setInterval(() => {
+        if (Math.random() > 0.4) {
+          windowAnims.sky1Birds.push({ x: -5, y: 15 + Math.random() * 15, speed: 0.12 + Math.random() * 0.08, wingPhase: Math.random() * Math.PI * 2, size: 6 + Math.random() * 4 });
+          windowAnims.sky2Birds.push({ x: -5, y: 15 + Math.random() * 15, speed: 0.1 + Math.random() * 0.06, wingPhase: Math.random() * Math.PI * 2, size: 5 + Math.random() * 3 });
+        }
+      }, 6000);
+      startWindowAnims();
+    }
+
+    function startWindowAnims() {
+      if (windowAnims.running) return;
+      windowAnims.running = true;
+      requestAnimationFrame(updateWindowAnims);
+    }
+
+    function updateWindowAnims() {
+      if (!windowAnims.running) return;
+
+      // Same phase cycle as outdoor
+      const phase = Math.floor((Date.now() % 60000) / 15000);
+      windowAnims.phase = phase;
+
+      // Update indoor backgrounds when phase changes
+      if (phase !== windowAnims.lastPhase) {
+        windowAnims.lastPhase = phase;
+        updateIndoorBackgrounds(phase);
+      }
+
+      updateSky1();
+      updateSky2();
+
+      requestAnimationFrame(updateWindowAnims);
+    }
+
+    function updateIndoorBackgrounds(phase) {
+      // Phase colors for indoor: warm day -> sunset orange -> dark night -> dawn pink
+      const floorColors = ['#8B7355', '#6B4423', '#2a2a3a', '#7a5a4a'];
+      const wallColors = ['#3d5a6e', '#8B4513', '#1a1a2a', '#6B4423'];
+
+      const room1Floor = document.querySelector('.room-1 .floor');
+      const room2Floor = document.querySelector('.room-2 .floor');
+      const room2Wall = document.querySelector('.room-2 .wall');
+
+      if (room1Floor) room1Floor.style.background = floorColors[phase];
+      if (room2Floor) room2Floor.style.background = floorColors[phase];
+      if (room2Wall) room2Wall.style.background = wallColors[phase];
+    }
+
+    function updateSky1() {
+      const canvas = document.getElementById('sky-1');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.offsetWidth || 300;
+      const h = canvas.offsetHeight || 150;
+      if (!w || !h) return;
+      canvas.width = w;
+      canvas.height = h;
+
+      const phase = windowAnims.phase;
+      const phaseColors = [
+        ['#4a90d9', '#87ceeb', '#c9e9f6'],
+        ['#e74c3c', '#f39c12', '#fc9068'],
+        ['#1a1a3e', '#2d2d5a', '#0a0a1a'],
+        ['#fd746c', '#ff9068', '#ffcba4']
+      ];
+
+      // Draw sky
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, phaseColors[phase][0]);
+      gradient.addColorStop(1, phaseColors[phase][2]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Stars (only at night)
+      if (phase === 2) {
+        windowAnims.sky2Stars.forEach(star => {
+          star.twinkle += 0.08;
+          const alpha = 0.3 + Math.sin(star.twinkle) * 0.3;
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(star.x * w / 100, star.y * h / 100, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      windowAnims.sky1Clouds.forEach(cloud => {
+        cloud.x += cloud.speed;
+        if (cloud.x > 110) cloud.x = -20;
+        const cx = cloud.x * w / 100;
+        const cy = cloud.y * h / 100;
+        ctx.beginPath();
+        ctx.arc(cx, cy, cloud.size, 0, Math.PI * 2);
+        ctx.arc(cx + cloud.size * 1.2, cy - cloud.size * 0.2, cloud.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Birds for living room
+      windowAnims.sky1Birds = windowAnims.sky1Birds.filter(bird => {
+        bird.x += bird.speed;
+        bird.wingPhase += 0.3;
+        if (bird.x > 105) return false;
+        const bx = bird.x * w / 100;
+        const by = bird.y * h / 100;
+        const wingY = Math.sin(bird.wingPhase) * bird.size * 0.5;
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bx - bird.size, by + wingY);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx + bird.size, by + wingY);
+        ctx.stroke();
+        return true;
+      });
+    }
+
+    function updateSky2() {
+      const canvas = document.getElementById('sky-2');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.offsetWidth || 300;
+      const h = canvas.offsetHeight || 150;
+      if (!w || !h) return;
+      canvas.width = w;
+      canvas.height = h;
+
+      const phase = windowAnims.phase;
+      const phaseColors = [
+        ['#4a90d9', '#87ceeb', '#c9e9f6'],
+        ['#e74c3c', '#f39c12', '#fc9068'],
+        ['#1a1a3e', '#2d2d5a', '#0a0a1a'],
+        ['#fd746c', '#ff9068', '#ffcba4']
+      ];
+
+      // Draw sky
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, phaseColors[phase][0]);
+      gradient.addColorStop(1, phaseColors[phase][2]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Stars
+      windowAnims.sky2Stars.forEach(star => {
+        star.twinkle += 0.05;
+        const alpha = 0.3 + Math.sin(star.twinkle) * 0.3;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(star.x * w / 100, star.y * h / 100, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Clouds for bedroom
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      windowAnims.sky2Clouds.forEach(cloud => {
+        cloud.x += cloud.speed;
+        if (cloud.x > 110) cloud.x = -20;
+        const cx = cloud.x * w / 100;
+        const cy = cloud.y * h / 100;
+        ctx.beginPath();
+        ctx.arc(cx, cy, cloud.size, 0, Math.PI * 2);
+        ctx.arc(cx + cloud.size * 1.2, cy - cloud.size * 0.2, cloud.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Moon (only at night)
+      if (phase === 2) {
+        const moonSize = Math.min(w, h) * 0.12;
+        ctx.fillStyle = '#f5f5dc';
+        ctx.beginPath();
+        ctx.arc(w * 0.75, h * 0.25, moonSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Birds for bedroom
+      windowAnims.sky2Birds = windowAnims.sky2Birds.filter(bird => {
+        bird.x += bird.speed;
+        bird.wingPhase += 0.3;
+        if (bird.x > 105) return false;
+        const bx = bird.x * w / 100;
+        const by = bird.y * h / 100;
+        const wingY = Math.sin(bird.wingPhase) * bird.size * 0.5;
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bx - bird.size, by + wingY);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx + bird.size, by + wingY);
+        ctx.stroke();
+        return true;
+      });
+    }
+
+    // ============ OUTDOOR ANIMATION ============
+    let outdoorAnim = {
+      running: false,
+      clouds: [],
+      birds: [],
+      stars: [],
+      timeOfDay: 'day',
+      lastPhase: -1
+    };
+
+    function setupOutdoorAnim() {
+      const canvas = document.getElementById('sky-3');
+      if (!canvas) return;
+
+      // Initialize clouds - faster movement
+      for (let i = 0; i < 5; i++) {
+        outdoorAnim.clouds.push({
+          x: Math.random() * 120 - 10,
+          y: 8 + Math.random() * 25,
+          size: 15 + Math.random() * 20,
+          speed: 0.2 + Math.random() * 0.2
+        });
+      }
+
+      // Initialize stars
+      for (let i = 0; i < 25; i++) {
+        outdoorAnim.stars.push({
+          x: Math.random() * 100,
+          y: Math.random() * 50,
+          size: 1 + Math.random() * 1.5,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+
+      // Birds spawn every 5 seconds
+      setInterval(() => {
+        if (outdoorAnim.timeOfDay !== 'night' && Math.random() > 0.3) {
+          outdoorAnim.birds.push({
+            x: -5,
+            y: 12 + Math.random() * 20,
+            speed: 0.15 + Math.random() * 0.1,
+            wingPhase: Math.random() * Math.PI * 2,
+            size: 8 + Math.random() * 6
+          });
+        }
+      }, 5000);
+
+      startOutdoorAnim();
+    }
+
+    function startOutdoorAnim() {
+      if (outdoorAnim.running) return;
+      outdoorAnim.running = true;
+      requestAnimationFrame(updateOutdoor);
+    }
+
+    function updateOutdoor() {
+      if (!outdoorAnim.running) return;
+
+      const canvas = document.getElementById('sky-3');
+      if (!canvas) {
+        requestAnimationFrame(updateOutdoor);
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      // Use parent dimensions if canvas has no size (hidden element)
+      const parent = canvas.parentElement;
+      let w = canvas.offsetWidth || (parent ? parent.offsetWidth : 300);
+      let h = canvas.offsetHeight || (parent ? parent.offsetHeight : 150);
+      if (!w || !h) {
+        w = 300; h = 150;
+      }
+      canvas.width = w;
+      canvas.height = h;
+
+      // Phase: 0=day, 1=sunset, 2=night, 3=dawn (15 sec each)
+      const phase = Math.floor((Date.now() % 60000) / 15000);
+
+      const phaseColors = [
+        ['#4a90d9', '#87ceeb', '#c9e9f6'],  // day
+        ['#e74c3c', '#f39c12', '#fc9068'],  // sunset
+        ['#1a1a3e', '#2d2d5a', '#0a0a1a'],  // night
+        ['#fd746c', '#ff9068', '#ffcba4']   // dawn
+      ];
+      const phaseSunAngles = [0.15, 0.25, 0, -0.15];
+      const phaseSunVisible = [true, true, false, true];
+      const phaseMoonVisible = [false, false, true, false];
+
+      const skyGrad = phaseColors[phase];
+      const sunVisible = phaseSunVisible[phase];
+      const moonVisible = phaseMoonVisible[phase];
+      const sunAngle = phaseSunAngles[phase];
+      outdoorAnim.timeOfDay = ['day','sunset','night','dawn'][phase];
+
+      // Draw sky gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, skyGrad[0]);
+      gradient.addColorStop(0.5, skyGrad[1]);
+      gradient.addColorStop(1, skyGrad[2]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Sun - proportional to canvas
+      const sunSize = Math.min(w, h) * 0.1;
+      if (sunVisible) {
+        const sunX = w * (0.5 + sunAngle);
+        const sunY = h * (0.2 + Math.abs(sunAngle) * 0.3);
+        // Glow
+        const glow = ctx.createRadialGradient(sunX, sunY, sunSize * 0.5, sunX, sunY, sunSize * 2);
+        glow.addColorStop(0, 'rgba(255,200,50,0.6)');
+        glow.addColorStop(1, 'rgba(255,150,0,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunSize * 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Body
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Moon - crescent
+      const moonSize = Math.min(w, h) * 0.07;
+      if (moonVisible) {
+        const moonX = w * 0.75;
+        const moonY = h * 0.2;
+        // Glow
+        const glow = ctx.createRadialGradient(moonX, moonY, moonSize, moonX, moonY, moonSize * 1.8);
+        glow.addColorStop(0, 'rgba(255,255,220,0.3)');
+        glow.addColorStop(1, 'rgba(255,255,200,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(moonX, moonY, moonSize * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        // Body
+        ctx.fillStyle = '#f5f5dc';
+        ctx.beginPath();
+        ctx.arc(moonX, moonY, moonSize, 0, Math.PI * 2);
+        ctx.fill();
+        // Shadow for crescent
+        ctx.fillStyle = skyGrad[0];
+        ctx.beginPath();
+        ctx.arc(moonX + moonSize * 0.4, moonY - moonSize * 0.15, moonSize * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Stars (only at night)
+      if (outdoorAnim.timeOfDay === 'night') {
+        outdoorAnim.stars.forEach(star => {
+          star.twinkle += 0.08;
+          const alpha = 0.4 + Math.sin(star.twinkle) * 0.4;
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(star.x * w / 100, star.y * h / 100, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // Clouds - big white puffs
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      outdoorAnim.clouds.forEach(cloud => {
+        cloud.x += cloud.speed;
+        if (cloud.x > 120) cloud.x = -30;
+        const cx = cloud.x * w / 100;
+        const cy = cloud.y * h / 100;
+        const cs = cloud.size;
+        // Draw big puffy cloud
+        ctx.beginPath();
+        ctx.arc(cx, cy, cs * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + cs * 1.5, cy - cs * 0.3, cs, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + cs * 3, cy, cs * 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Birds - big black V shape
+      outdoorAnim.birds = outdoorAnim.birds.filter(bird => {
+        bird.x += bird.speed;
+        bird.wingPhase += 0.3;
+        if (bird.x > 105) return false;
+        const bx = bird.x * w / 100;
+        const by = bird.y * h / 100;
+        const wingY = Math.sin(bird.wingPhase) * bird.size * 0.5;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(bx - bird.size, by + wingY);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx + bird.size, by + wingY);
+        ctx.stroke();
+        return true;
+      });
+
+      // Ground trees
+      ctx.fillStyle = outdoorAnim.timeOfDay === 'night' ? '#1a2a1a' : '#4a7c3f';
+      for (let i = 0; i < 10; i++) {
+        const tx = i * (w / 10);
+        const th = h * (0.12 + Math.random() * 0.08);
+        ctx.beginPath();
+        ctx.moveTo(tx, h);
+        ctx.lineTo(tx + w * 0.06, h - th);
+        ctx.lineTo(tx + w * 0.12, h);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(updateOutdoor);
+    }
+
+    function drawSky(canvasId, type) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.offsetWidth || 300;
+      const h = canvas.offsetHeight || 150;
+      canvas.width = w;
+      canvas.height = h;
+
+      if (type === 'city') {
+        // Night city
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, w, h);
+
+        // Stars
+        for (let i = 0; i < 30; i++) {
+          ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`;
+          ctx.beginPath();
+          ctx.arc(Math.random() * w, Math.random() * h * 0.6, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Moon
+        ctx.fillStyle = '#f5f5dc';
+        ctx.beginPath();
+        ctx.arc(w * 0.8, h * 0.2, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Buildings
+        ctx.fillStyle = '#2c3e50';
+        for (let i = 0; i < 8; i++) {
+          const bh = 30 + Math.random() * 50;
+          ctx.fillRect(i * (w / 8), h - bh, w / 8 - 4, bh);
+          // Windows
+          ctx.fillStyle = '#ffd700';
+          for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+              if (Math.random() > 0.3) {
+                ctx.fillRect(i * (w / 8) + 5 + j * 8, h - bh + 10 + k * 12, 4, 6);
+              }
+            }
+          }
+          ctx.fillStyle = '#2c3e50';
+        }
+      } else if (type === 'stars') {
+        // Starry night
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(0, 0, w, h);
+
+        // Stars
+        for (let i = 0; i < 50; i++) {
+          ctx.fillStyle = `rgba(255,255,255,${Math.random()})`;
+          ctx.beginPath();
+          ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Moon
+        ctx.fillStyle = '#f5f5dc';
+        ctx.beginPath();
+        ctx.arc(w * 0.75, h * 0.25, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0a0a1a';
+        ctx.beginPath();
+        ctx.arc(w * 0.75 + 8, h * 0.25 - 5, 22, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawCloud(ctx, x, y, size) {
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.arc(x + size, y - size * 0.3, size * 0.8, 0, Math.PI * 2);
+      ctx.arc(x + size * 2, y, size * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ============ PANELS ============
+    function switchPanel(panel) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`[data-panel="${panel}"]`).classList.add('active');
+
+      // Hide all panels
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.room-scene').forEach(r => r.classList.remove('active'));
+
+      // Hide room switcher when not in room view
+      document.querySelector('.room-switcher').style.display = panel === 'room' ? 'flex' : 'none';
+
+      if (panel === 'room') {
+        document.getElementById(`room-${gameState.room}`).classList.add('active');
+        updateRoomSwitcher();
+      } else {
+        document.getElementById(`panel-${panel}`).classList.add('active');
+        if (panel === 'math') {
+          renderMathProgress();
+          renderMap();
+        }
+      }
+    }
+
+    function switchRoom(roomNum) {
+      gameState.room = roomNum;
+      document.querySelectorAll('.room-scene').forEach(r => r.classList.remove('active'));
+      document.getElementById(`room-${roomNum}`).classList.add('active');
+      updateRoomSwitcher();
+      renderRoom();
+      updateCapybaraMood();
+      saveGame();
+      // Restart animations when entering rooms
+      if (roomNum === 1 || roomNum === 2) {
+        windowAnims.running = false;
+        setTimeout(() => startWindowAnims(), 100);
+      }
+      if (roomNum === 3) {
+        outdoorAnim.running = false;
+        setTimeout(() => startOutdoorAnim(), 100);
+      }
+    }
+
+    function updateRoomSwitcher() {
+      document.querySelectorAll('.room-switch-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.room) === gameState.room);
+      });
+    }
+
+    // ============ MATH CHALLENGE ============
+    // Question generators by grade
+    const mathGenerators = {
+      grade3: function() {
+        const type = Math.random();
+        let a, b, c, answer, question;
+
+        if (type < 0.4) {
+          // Three-digit addition/subtraction
+          a = Math.floor(Math.random() * 400) + 100;
+          b = Math.floor(Math.random() * 400) + 100;
+          if (Math.random() > 0.5) {
+            answer = a + b;
+            question = `${a} + ${b} = ?`;
+          } else {
+            if (b > a) [a, b] = [b, a];
+            answer = a - b;
+            question = `${a} - ${b} = ?`;
+          }
+        } else if (type < 0.7) {
+          // Simple multiplication (2-9 times table)
+          a = Math.floor(Math.random() * 8) + 2;
+          b = Math.floor(Math.random() * 8) + 2;
+          answer = a * b;
+          question = `${a} × ${b} = ?`;
+        } else {
+          // Simple division (divisible only)
+          b = Math.floor(Math.random() * 8) + 2;
+          answer = Math.floor(Math.random() * 8) + 2;
+          a = b * answer;
+          question = `${a} ÷ ${b} = ?`;
+        }
+        return generateQuestion(a, b, answer, question);
+      },
+      grade4: function() {
+        const type = Math.random();
+        let a, b, c, answer, question;
+
+        if (type < 0.25) {
+          // Four operations
+          a = Math.floor(Math.random() * 200) + 50;
+          b = Math.floor(Math.random() * 200) + 50;
+          const op = ['+', '-', '×', '÷'][Math.floor(Math.random() * 4)];
+          if (op === '+') answer = a + b;
+          else if (op === '-') { if (b > a) [a, b] = [b, a]; answer = a - b; }
+          else if (op === '×') answer = a * b;
+          else { b = Math.max(2, b); a = b * (Math.floor(Math.random() * 10) + 1); answer = a / b; }
+          question = `${a} ${op} ${b} = ?`;
+        } else if (type < 0.5) {
+          // Mixed: a + b × c
+          a = Math.floor(Math.random() * 5) + 2;
+          b = Math.floor(Math.random() * 5) + 2;
+          c = Math.floor(Math.random() * 20) + 10;
+          answer = a * b + c;
+          question = `${a} × ${b} + ${c} = ?`;
+        } else if (type < 0.75) {
+          // Simple fraction (1/2, 1/3, etc.)
+          const denom = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+          const num = Math.floor(Math.random() * (denom - 1)) + 1;
+          answer = num;
+          question = `${num}/${denom} 是几分之几？`;
+          return { question, answer, options: generateFractionOptions(num, denom) };
+        } else {
+          // Simple perimeter/area (rectangle)
+          const l = Math.floor(Math.random() * 5) + 3;
+          const w = Math.floor(Math.random() * 5) + 3;
+          if (Math.random() > 0.5) {
+            answer = (l + w) * 2;
+            question = `长${l}宽${w}的长方形，周长是？`;
+          } else {
+            answer = l * w;
+            question = `长${l}宽${w}的长方形，面积是？`;
+          }
+        }
+        return generateQuestion(null, null, answer, question);
+      },
+      grade5: function() {
+        const type = Math.random();
+        let a, b, c, answer, question;
+
+        if (type < 0.25) {
+          // Decimal operations
+          a = Math.floor(Math.random() * 50) + 10;
+          b = Math.floor(Math.random() * 9) + 1;
+          const ops = ['+', '-'];
+          const op = ops[Math.floor(Math.random() * ops.length)];
+          const decimalA = (a / 10).toFixed(1);
+          const decimalB = (b / 10).toFixed(1);
+          answer = op === '+' ? parseFloat((a/10 + b/10).toFixed(1)) : parseFloat((a/10 - b/10).toFixed(1));
+          question = `${decimalA} ${op} ${decimalB} = ?`;
+          return generateDecimalQuestion(answer, question);
+        } else if (type < 0.5) {
+          // Simple equation: ax + b = c
+          a = Math.floor(Math.random() * 3) + 2;
+          const x = Math.floor(Math.random() * 10) + 1;
+          c = a * x + Math.floor(Math.random() * 10);
+          answer = x;
+          question = `${a}×x + ${c - a*x} = ${c}，x = ?`;
+        } else if (type < 0.75) {
+          // Percentage
+          const whole = (Math.floor(Math.random() * 5) + 1) * 100;
+          const pct = [10, 20, 25, 50][Math.floor(Math.random() * 4)];
+          answer = whole * pct / 100;
+          question = `${whole}的${pct}%是？`;
+        } else {
+          // Volume of cube
+          const side = Math.floor(Math.random() * 4) + 2;
+          answer = side * side * side;
+          question = `棱长为${side}的正方体，体积是？`;
+        }
+        return generateQuestion(null, null, answer, question);
+      }
+    };
+
+    function generateQuestion(a, b, answer, question) {
+      const options = [answer];
+      while (options.length < 4) {
+        const wrong = answer + (Math.floor(Math.random() * 20) - 10);
+        if (wrong > 0 && !options.includes(wrong)) {
+          options.push(wrong);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+      return { question, answer, options };
+    }
+
+    function generateDecimalQuestion(answer, question) {
+      const options = [answer];
+      while (options.length < 4) {
+        const delta = (Math.random() * 2 - 1).toFixed(1);
+        const wrong = parseFloat((answer + parseFloat(delta)).toFixed(1));
+        if (wrong > 0 && !options.includes(wrong)) {
+          options.push(wrong);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+      return { question, answer, options };
+    }
+
+    function generateFractionOptions(num, denom) {
+      const answer = num;
+      const options = [num];
+      const wrongNums = [1, 2, 3, 4, 5].filter(n => n !== num);
+      while (options.length < 4 && wrongNums.length > 0) {
+        const idx = Math.floor(Math.random() * wrongNums.length);
+        options.push(wrongNums.splice(idx, 1)[0]);
+      }
+      options.sort(() => Math.random() - 0.5);
+      return { question: `${num}/${denom} 是几分之几？`, answer, options };
+    }
+
+    function generateMath(level) {
+      const grade = getGradeForLevel(level);
+      const generator = mathGenerators[`grade${grade}`];
+      return generator();
+    }
+
+    function startMathChallenge() {
+      currentMath = generateMath(gameState.currentLevel);
+      levelQuestionCount = 0;
+      levelAnswers = [];
+      gameState.levelCorrect = 0;
+      gameState.levelWrong = 0;
+      document.getElementById('math-card').style.display = 'block';
+      document.getElementById('math-result').style.display = 'none';
+      document.getElementById('level-info').textContent = `第${gameState.currentLevel}关 · ${getZoneForLevel(gameState.currentLevel).name}`;
+      renderMathQuestion();
+      renderMathProgress();
+      renderMap();
+    }
+
+    function renderMathQuestion() {
+      document.getElementById('math-question').textContent = currentMath.question;
+      const optionsEl = document.getElementById('math-options');
+      optionsEl.innerHTML = '';
+      currentMath.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'math-option';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => checkAnswer(opt, btn));
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function renderMathProgress() {
+      const el = document.getElementById('math-progress');
+      el.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'math-dot';
+        if (i < levelAnswers.length) {
+          dot.classList.add(levelAnswers[i] ? 'done' : 'wrong');
+        }
+        if (i === levelQuestionCount) dot.classList.add('current');
+        el.appendChild(dot);
+      }
+    }
+
+    function checkAnswer(opt, btnEl) {
+      const isCorrect = opt === currentMath.answer;
+
+      if (isCorrect) {
+        btnEl.classList.add('correct');
+        gameState.levelCorrect++;
+        levelAnswers.push(true);
+      } else {
+        btnEl.classList.add('wrong');
+        gameState.levelWrong++;
+        levelAnswers.push(false);
+        playWrongSound();
+      }
+
+      if (isCorrect) {
+        playCorrectSound();
+      }
+
+      levelQuestionCount++;
+      renderMathProgress();
+
+      setTimeout(() => {
+        if (levelQuestionCount >= 10) {
+          showMathResult();
+        } else {
+          currentMath = generateMath(gameState.currentLevel);
+          renderMathQuestion();
+        }
+      }, 600);
+    }
+
+    function showMathResult() {
+      document.getElementById('math-card').style.display = 'none';
+      document.getElementById('math-result').style.display = 'block';
+
+      const correct = gameState.levelCorrect;
+      const wrong = gameState.levelWrong;
+      const allCorrect = correct === 10;
+      const demoted = wrong >= 3;
+
+      // Calculate gold reward
+      const reward = getGoldReward(gameState.currentLevel, correct, 10);
+      gameState.gold += reward.total;
+      updateGoldDisplay();
+
+      let title, subTitle;
+      if (allCorrect) {
+        title = '🎉 全对！太厉害了！';
+        subTitle = '晋升至第' + (gameState.currentLevel + 1) + '关！';
+        gameState.currentLevel = Math.min(100, gameState.currentLevel + 1);
+        playVictorySound();
+      } else if (demoted) {
+        title = '💪 继续加油！';
+        subTitle = '退回第' + (Math.max(1, gameState.currentLevel - 1)) + '关';
+        gameState.currentLevel = Math.max(1, gameState.currentLevel - 1);
+      } else {
+        title = '👍 不错！';
+        subTitle = '再接再厉挑战本关';
+      }
+
+      document.getElementById('result-title').textContent = title;
+      document.getElementById('result-subtitle').textContent = subTitle;
+      document.getElementById('result-reward').textContent = `+${reward.total} 🪙`;
+      document.getElementById('result-detail').textContent = `答对${correct}题，答错${wrong}题`;
+
+      // Reset for next round
+      gameState.levelCorrect = 0;
+      gameState.levelWrong = 0;
+      levelQuestionCount = 0;
+
+      renderMap();
+      saveGame();
+    }
+
+    function renderMap() {
+      const el = document.getElementById('level-map');
+      if (!el) return;
+      el.innerHTML = '';
+
+      MAP_NODES.forEach(zone => {
+        const zoneDiv = document.createElement('div');
+        zoneDiv.className = 'map-zone';
+
+        // Check if current level is in this zone
+        const inZone = gameState.currentLevel >= zone.range[0] && gameState.currentLevel <= zone.range[1];
+        const passed = gameState.currentLevel > zone.range[1];
+
+        if (inZone) zoneDiv.classList.add('current');
+        if (passed) zoneDiv.classList.add('passed');
+
+        zoneDiv.innerHTML = `
+          <div class="map-zone-icon">${zone.icon}</div>
+          <div class="map-zone-name">${zone.name}</div>
+          <div class="map-zone-range">${zone.range[0]}-${zone.range[1]}</div>
+        `;
+        el.appendChild(zoneDiv);
+      });
+
+      // Update current level indicator
+      const levelIndicator = document.getElementById('current-level-indicator');
+      if (levelIndicator) {
+        levelIndicator.textContent = `第${gameState.currentLevel}关`;
+      }
+    }
+
+    function renderLevelBtns() {
+      // No longer using level selection - just show map
+      const el = document.getElementById('level-btns');
+      el.innerHTML = '<div class="level-hint">完成当前关卡自动进入下一关</div>';
+    }
+
+    // ============ SHOP ============
+    function renderShop() {
+      const el = document.getElementById('shop-grid');
+      el.innerHTML = '';
+      SHOP_ITEMS.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        div.innerHTML = `
+          <div class="shop-item-icon">${item.icon}</div>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-item-price">🪙 ${item.price}</div>
+          <div class="shop-item-effect">${formatEffect(item.effect)}</div>
+        `;
+        div.addEventListener('click', () => buyItem(item));
+        el.appendChild(div);
+      });
+    }
+
+    function formatEffect(effect) {
+      const parts = [];
+      if (effect.hunger) parts.push(`🍖+${effect.hunger}`);
+      if (effect.mood) parts.push(`😊+${effect.mood}`);
+      if (effect.health) parts.push(`💚+${effect.health}`);
+      return parts.join(' ');
+    }
+
+    function buyItem(item) {
+      if (gameState.gold < item.price) {
+        showModal('😢 金币不足', `需要 ${item.price} 金币才能购买 ${item.name}`, '❌');
+        return;
+      }
+
+      gameState.gold -= item.price;
+      gameState.inventory.push(item.id);
+      updateGoldDisplay();
+      renderInventory();
+      saveGame();
+
+      const icon = item.type === 'food' ? '🍽️' : '🎁';
+      showModal('🎉 购买成功！', `获得了 ${item.name}，去背包看看吧！`, icon);
+    }
+
+    function renderInventory() {
+      const el = document.getElementById('inventory-grid');
+      if (gameState.inventory.length === 0) {
+        el.innerHTML = '<span style="color: var(--text-dim); font-size: 12px;">空空如也</span>';
+        return;
+      }
+
+      el.innerHTML = '';
+      const counts = {};
+      gameState.inventory.forEach(id => {
+        counts[id] = (counts[id] || 0) + 1;
+      });
+
+      Object.entries(counts).forEach(([id, count]) => {
+        const item = SHOP_ITEMS.find(i => i.id === id);
+        if (!item) return;
+
+        const div = document.createElement('div');
+        div.className = 'inventory-item';
+        div.innerHTML = `<span>${item.icon}</span><span>×${count}</span>`;
+        div.addEventListener('click', () => useItem(item));
+        el.appendChild(div);
+      });
+    }
+
+    function useItem(item) {
+      // Apply effect
+      if (item.effect.hunger) {
+        gameState.pet.hunger = Math.min(100, gameState.pet.hunger + item.effect.hunger);
+      }
+      if (item.effect.mood) {
+        gameState.pet.mood = Math.min(100, gameState.pet.mood + item.effect.mood);
+      }
+      if (item.effect.health) {
+        gameState.pet.health = Math.min(100, gameState.pet.health + item.effect.health);
+      }
+
+      // Remove from inventory
+      const idx = gameState.inventory.indexOf(item.id);
+      if (idx > -1) gameState.inventory.splice(idx, 1);
+
+      updateStatusBars();
+      updateCapybaraMood();
+      renderInventory();
+      saveGame();
+
+      // Animation
+      const capy = document.querySelector(`#capybara-${gameState.room}`) || document.getElementById('capybara');
+      capy.classList.add('eating');
+      setTimeout(() => capy.classList.remove('eating'), 1000);
+
+      showToast(`使用了 ${item.name}！`);
+    }
+
+    // ============ DECOR ============
+    function renderDecor() {
+      // Room tabs
+      const tabsEl = document.getElementById('room-tabs');
+      tabsEl.innerHTML = '';
+      for (let i = 1; i <= 3; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'room-tab' + (i === currentDecorRoom ? ' active' : '');
+        btn.textContent = ROOM_NAMES[`room${i}`];
+        btn.addEventListener('click', () => {
+          currentDecorRoom = i;
+          document.querySelectorAll('.room-tab').forEach(t => t.classList.remove('active'));
+          btn.classList.add('active');
+          renderDecorGrid();
+        });
+        tabsEl.appendChild(btn);
+      }
+
+      renderDecorGrid();
+    }
+
+    function renderDecorGrid() {
+      const el = document.getElementById('decor-grid');
+      el.innerHTML = '';
+      const items = FURNITURE[`room${currentDecorRoom}`];
+      const placed = gameState.furniture[`room${currentDecorRoom}`];
+
+      items.forEach(item => {
+        const isPlaced = placed.includes(item.id);
+        const div = document.createElement('div');
+        div.className = 'decor-item' + (isPlaced ? ' placed' : '');
+        div.innerHTML = `
+          <div class="decor-item-icon">${item.icon}</div>
+          <div class="decor-item-name">${item.name}</div>
+          <div class="decor-item-price">${isPlaced ? '已放置' : '🪙 ' + item.price}</div>
+        `;
+
+        if (!isPlaced) {
+          div.addEventListener('click', () => buyFurniture(item));
+        }
+        el.appendChild(div);
+      });
+    }
+
+    function buyFurniture(item) {
+      if (gameState.gold < item.price) {
+        showModal('😢 金币不足', `需要 ${item.price} 金币才能购买 ${item.name}`, '❌');
+        return;
+      }
+
+      const roomKey = `room${currentDecorRoom}`;
+      if (gameState.furniture[roomKey].length >= 6) {
+        showModal('😥 空间不足', '这个房间已经放不下更多家具了！', '❌');
+        return;
+      }
+
+      gameState.gold -= item.price;
+      gameState.furniture[roomKey].push(item.id);
+      updateGoldDisplay();
+      renderRoom();
+      renderDecorGrid();
+      saveGame();
+
+      showModal('🎉 放置成功！', `${item.name} 已添加到 ${ROOM_NAMES[roomKey]}！`, '🪑');
+    }
+
+    function renderRoom() {
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById(`furniture-room${i}`);
+        if (!el) continue;
+        el.innerHTML = '';
+
+        const grid = document.createElement('div');
+        grid.className = 'furniture-grid';
+        grid.dataset.room = i;
+
+        const items = gameState.furniture[`room${i}`] || [];
+        const positions = loadFurniturePositions(i) || [];
+
+        items.forEach((id, idx) => {
+          const item = FURNITURE[`room${i}`].find(f => f.id === id);
+          if (!item) return;
+
+          const slot = document.createElement('div');
+          slot.className = 'furniture-slot';
+          slot.dataset.slotId = `${id}-${idx}`;
+
+          // Use saved position or default positions
+          const pos = positions[idx] || getDefaultPosition(idx, i);
+          slot.style.left = pos.x + '%';
+          slot.style.bottom = pos.y + '%';
+
+          const span = document.createElement('span');
+          span.className = 'furniture-item';
+          span.textContent = item.icon;
+          span.dataset.furnitureId = id;
+          span.dataset.room = i;
+          span.dataset.slotIdx = idx;
+          if (pos.size) span.style.fontSize = pos.size + 'px';
+
+          // Add drag events
+          addDragEvents(span);
+
+          // Add resize handle
+          const resizeHandle = document.createElement('div');
+          resizeHandle.className = 'resize-handle';
+          resizeHandle.textContent = '⤡';
+          resizeHandle.dataset.room = i;
+          resizeHandle.dataset.slotIdx = idx;
+          addResizeEvents(resizeHandle);
+
+          slot.appendChild(span);
+          slot.appendChild(resizeHandle);
+          grid.appendChild(slot);
+        });
+
+        // Add drop indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'drop-indicator';
+        indicator.id = `drop-indicator-${i}`;
+        grid.appendChild(indicator);
+
+        el.appendChild(grid);
+      }
+
+      // Load capybara positions
+      loadCapybaraPositions();
+    }
+
+    function loadCapybaraPositions() {
+      for (let i = 1; i <= 3; i++) {
+        const capy = document.getElementById(`capybara-${i}`);
+        if (!capy) continue;
+        const saved = localStorage.getItem(`capybara_pos_room${i}`);
+        if (saved) {
+          try {
+            const pos = JSON.parse(saved);
+            if (pos.left) capy.style.left = pos.left;
+            if (pos.bottom) {
+              capy.style.bottom = pos.bottom;
+              capy.style.transform = 'none';
+            }
+          } catch (e) {}
+        }
+      }
+    }
+
+    function getDefaultPosition(idx, room) {
+      // Default positions for each slot
+      const positions = {
+        1: [ // Living room
+          { x: 5, y: 10 },
+          { x: 20, y: 25 },
+          { x: 5, y: 40 },
+          { x: 75, y: 10 },
+          { x: 60, y: 25 },
+          { x: 75, y: 40 }
+        ],
+        2: [ // Bedroom
+          { x: 5, y: 15 },
+          { x: 20, y: 30 },
+          { x: 5, y: 45 },
+          { x: 75, y: 15 },
+          { x: 60, y: 30 },
+          { x: 75, y: 45 }
+        ],
+        3: [ // Outdoor
+          { x: 10, y: 20 },
+          { x: 25, y: 35 },
+          { x: 10, y: 50 },
+          { x: 70, y: 20 },
+          { x: 55, y: 35 },
+          { x: 70, y: 50 }
+        ]
+      };
+      return positions[room][idx % 6] || { x: 10 + idx * 15, y: 20 + idx * 10 };
+    }
+
+    function loadFurniturePositions(room) {
+      const saved = localStorage.getItem(`capybara_furniture_pos_room${room}`);
+      return saved ? JSON.parse(saved) : null;
+    }
+
+    function saveFurniturePositions(room, positions) {
+      localStorage.setItem(`capybara_furniture_pos_room${room}`, JSON.stringify(positions));
+    }
+
+    // ============ DRAG & DROP ============
+    let dragState = {
+      active: false,
+      item: null,
+      startX: 0,
+      startY: 0,
+      offsetX: 0,
+      offsetY: 0,
+      room: null,
+      slotIdx: null
+    };
+
+    let resizeState = {
+      active: false,
+      item: null,
+      startX: 0,
+      startY: 0,
+      slot: null,
+      room: null,
+      slotIdx: null,
+      startWidth: 0,
+      startHeight: 0
+    };
+
+    let selectedFurniture = null;
+
+    function addDragEvents(item) {
+      // Touch events
+      item.addEventListener('touchstart', handleDragStart, { passive: false });
+      item.addEventListener('touchmove', handleDragMove, { passive: false });
+      item.addEventListener('touchend', handleDragEnd, { passive: false });
+
+      // Mouse events
+      item.addEventListener('mousedown', handleDragStart);
+
+      // Click to select
+      item.addEventListener('click', handleFurnitureSelect);
+    }
+
+    function handleFurnitureSelect(e) {
+      e.stopPropagation();
+
+      // Deselect previous
+      if (selectedFurniture) {
+        selectedFurniture.classList.remove('selected');
+        const prevHandle = selectedFurniture.parentElement.querySelector('.resize-handle');
+        if (prevHandle) prevHandle.classList.remove('visible');
+      }
+
+      // Select new
+      const item = e.target;
+      if (item.classList.contains('furniture-item')) {
+        item.classList.add('selected');
+        selectedFurniture = item;
+        const handle = item.parentElement.querySelector('.resize-handle');
+        if (handle) handle.classList.add('visible');
+      }
+    }
+
+    function addResizeEvents(handle) {
+      handle.addEventListener('mousedown', handleResizeStart);
+      handle.addEventListener('touchstart', handleResizeStart, { passive: false });
+    }
+
+    function handleResizeStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const handle = e.target;
+      const slot = handle.parentElement;
+      const item = slot.querySelector('.furniture-item');
+
+      const touch = e.touches ? e.touches[0] : e;
+      const rect = item.getBoundingClientRect();
+
+      resizeState = {
+        active: true,
+        item: item,
+        slot: slot,
+        room: parseInt(handle.dataset.room),
+        slotIdx: parseInt(handle.dataset.slotIdx),
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startWidth: rect.width,
+        startHeight: rect.height
+      };
+
+      document.addEventListener('mousemove', handleResizeMove);
+      document.addEventListener('mouseup', handleResizeEnd);
+      document.addEventListener('touchmove', handleResizeMove, { passive: false });
+      document.addEventListener('touchend', handleResizeEnd);
+    }
+
+    function handleResizeMove(e) {
+      if (!resizeState.active) return;
+      e.preventDefault();
+
+      const touch = e.touches ? e.touches[0] : e;
+      const deltaX = touch.clientX - resizeState.startX;
+      const deltaY = touch.clientY - resizeState.startY;
+      const delta = Math.max(deltaX, deltaY);
+
+      const newSize = Math.max(24, Math.min(96, resizeState.startWidth + delta));
+      resizeState.item.style.fontSize = newSize + 'px';
+
+      // Save size
+      const positions = loadFurniturePositions(resizeState.room) || [];
+      positions[resizeState.slotIdx] = {
+        ...positions[resizeState.slotIdx],
+        size: newSize
+      };
+      saveFurniturePositions(resizeState.room, positions);
+    }
+
+    function handleResizeEnd() {
+      if (!resizeState.active) return;
+      resizeState.active = false;
+
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+      document.removeEventListener('touchmove', handleResizeMove);
+      document.removeEventListener('touchend', handleResizeEnd);
+      saveGame();
+    }
+
+    function handleDragStart(e) {
+      e.preventDefault();
+      const item = e.target;
+      if (!item.classList.contains('furniture-item')) return;
+
+      // Deselect when starting drag
+      if (selectedFurniture && selectedFurniture !== item) {
+        selectedFurniture.classList.remove('selected');
+        const prevHandle = selectedFurniture.parentElement.querySelector('.resize-handle');
+        if (prevHandle) prevHandle.classList.remove('visible');
+        selectedFurniture = null;
+      }
+
+      const touch = e.touches ? e.touches[0] : e;
+      const rect = item.getBoundingClientRect();
+
+      dragState = {
+        active: true,
+        item: item,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        offsetX: touch.clientX - rect.left - rect.width / 2,
+        offsetY: touch.clientY - rect.top - rect.height / 2,
+        room: parseInt(item.dataset.room),
+        slotIdx: parseInt(item.dataset.slotIdx)
+      };
+
+      // Bring to top immediately
+      zIndexCounter++;
+      item.parentElement.style.zIndex = 10000 + zIndexCounter;
+
+      item.classList.add('dragging');
+
+      // Show drop indicator
+      const indicator = document.getElementById(`drop-indicator-${dragState.room}`);
+      if (indicator) {
+        indicator.classList.add('visible');
+      }
+
+      document.addEventListener('mousemove', handleDragMove);
+      document.addEventListener('mouseup', handleDragEnd);
+    }
+
+    function handleDragMove(e) {
+      if (!dragState.active) return;
+      e.preventDefault();
+
+      const touch = e.touches ? e.touches[0] : e;
+      const grid = document.querySelector(`#furniture-room${dragState.room} .furniture-grid`);
+      if (!grid) return;
+
+      const gridRect = grid.getBoundingClientRect();
+      const x = ((touch.clientX - gridRect.left) / gridRect.width) * 100;
+      const y = (1 - (touch.clientY - gridRect.top) / gridRect.height) * 100;
+
+      // Clamp values
+      const clampedX = Math.max(2, Math.min(90, x));
+      const clampedY = Math.max(5, Math.min(80, y));
+
+      // Move the slot
+      const slot = dragState.item.parentElement;
+      slot.style.left = clampedX + '%';
+      slot.style.bottom = clampedY + '%';
+
+      // Update indicator position
+      const indicator = document.getElementById(`drop-indicator-${dragState.room}`);
+      if (indicator) {
+        indicator.style.left = (clampedX * gridRect.width / 100 - 25) + 'px';
+        indicator.style.top = (gridRect.height - clampedY * gridRect.height / 100 - 25) + 'px';
+      }
+    }
+
+    function handleDragEnd(e) {
+      if (!dragState.active) return;
+
+      dragState.item.classList.remove('dragging');
+
+      // Bring to front
+      zIndexCounter++;
+      dragState.item.parentElement.style.zIndex = 10000 + zIndexCounter;
+
+      // Hide indicator
+      const indicator = document.getElementById(`drop-indicator-${dragState.room}`);
+      if (indicator) {
+        indicator.classList.remove('visible');
+      }
+
+      // Save new position
+      const slot = dragState.item.parentElement;
+      const newX = parseFloat(slot.style.left);
+      const newY = parseFloat(slot.style.bottom);
+
+      // Update saved positions
+      const positions = loadFurniturePositions(dragState.room) || [];
+      positions[dragState.slotIdx] = { ...positions[dragState.slotIdx], x: newX, y: newY };
+      saveFurniturePositions(dragState.room, positions);
+
+      // Cleanup
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+
+      dragState = {
+        active: false,
+        item: null,
+        startX: 0,
+        startY: 0,
+        offsetX: 0,
+        offsetY: 0,
+        room: null,
+        slotIdx: null
+      };
+
+      saveGame();
+    }
+
+    // Click on empty area to deselect
+    document.addEventListener('click', (e) => {
+      if (selectedFurniture && !e.target.closest('.furniture-item') && !e.target.closest('.resize-handle')) {
+        selectedFurniture.classList.remove('selected');
+        const handle = selectedFurniture.parentElement.querySelector('.resize-handle');
+        if (handle) handle.classList.remove('visible');
+        selectedFurniture = null;
+      }
+    });
+
+    // ============ CAPYBARA MOOD ============
+    function updateCapybaraMood() {
+      const { hunger, mood, health } = gameState.pet;
+
+      // Remove all mood classes
+      document.querySelectorAll('.capybara').forEach(c => {
+        c.classList.remove('wobble', 'sad', 'sick', 'sleeping', 'shake');
+        c.querySelectorAll('.capy-eye').forEach(e => {
+          e.classList.remove('happy', 'sad');
+        });
+      });
+
+      const capy = document.getElementById(`capybara-${gameState.room}`) ||
+                   document.getElementById('capybara');
+
+      // Sleeping
+      if (health < 20 || mood < 20) {
+        capy.classList.add('sleeping');
+        const zzz = document.getElementById(`zzz-${gameState.room}`) || document.getElementById('zzz');
+        if (zzz) zzz.style.display = 'block';
+        return;
+      }
+
+      const zzz = document.getElementById(`zzz-${gameState.room}`) || document.getElementById('zzz');
+      if (zzz) zzz.style.display = 'none';
+
+      // Sick
+      if (health < 30) {
+        capy.classList.add('sick', 'shake');
+        return;
+      }
+
+      // Sad
+      if (mood < 30) {
+        capy.classList.add('sad');
+        capy.querySelectorAll('.capy-eye').forEach(e => e.classList.add('sad'));
+        return;
+      }
+
+      // Happy
+      if (mood > 70 && hunger > 30) {
+        capy.classList.add('wobble');
+        capy.querySelectorAll('.capy-eye').forEach(e => e.classList.add('happy'));
+      }
+    }
+
+    function blinkCapybara() {
+      const capy = document.getElementById(`capybara-${gameState.room}`) ||
+                   document.getElementById('capybara');
+      if (capy && !capy.classList.contains('sleeping')) {
+        capy.classList.add('blink');
+        setTimeout(() => capy.classList.remove('blink'), 150);
+      }
+    }
+
+    // ============ STATUS ============
+    function updateStatusBars() {
+      document.getElementById('hunger-bar').style.width = gameState.pet.hunger + '%';
+      document.getElementById('mood-bar').style.width = gameState.pet.mood + '%';
+      document.getElementById('health-bar').style.width = gameState.pet.health + '%';
+    }
+
+    function updateGoldDisplay() {
+      document.getElementById('gold-amount').textContent = gameState.gold;
+    }
+
+    function updatePetStatus() {
+      gameState.pet.hunger = Math.max(0, gameState.pet.hunger - 2);
+      gameState.pet.mood = Math.max(0, gameState.pet.mood - 1);
+
+      // Low hunger affects health
+      if (gameState.pet.hunger < 20) {
+        gameState.pet.health = Math.max(0, gameState.pet.health - 1);
+      }
+
+      updateStatusBars();
+      updateCapybaraMood();
+      saveGame();
+    }
+
+    // ============ PERSISTENCE ============
+    function saveGame() {
+      localStorage.setItem('capybara_save', JSON.stringify(gameState));
+    }
+
+    function loadGame() {
+      const saved = localStorage.getItem('capybara_save');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          gameState = { ...gameState, ...parsed };
+        } catch (e) {
+          console.warn('Failed to load save');
+        }
+      }
+      updateGoldDisplay();
+    }
+
+    // ============ MODALS & TOASTS ============
+    function showModal(title, desc, icon = '🎉') {
+      document.getElementById('modal-icon').textContent = icon;
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-desc').textContent = desc;
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function showToast(msg) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    // ============ START ============
+    init();
+  </script>
+</body>
+</html>
