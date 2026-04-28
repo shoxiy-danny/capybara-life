@@ -5553,8 +5553,10 @@
     let selectedFurniture = null;
 
     function addDragEvents(item) {
-      // Mouse events only - remove touch events temporarily for debugging
+      // Mouse events
       item.addEventListener('mousedown', handleDragStart);
+      // Touch events for mobile
+      item.addEventListener('touchstart', handleDragStart, { passive: false });
 
       // Click to select
       item.addEventListener('click', handleFurnitureSelect);
@@ -5727,21 +5729,26 @@
     }
 
     function handleDragStart(e) {
-      console.log('[DRAG] handleDragStart called');
+      console.log('[DRAG] handleDragStart called, target:', e.target.className, 'id:', e.target.id);
       // Prevent duplicate calls
-      if (dragState.active) return;
+      if (dragState.active) { console.log('[DRAG] rejected: dragState.active=true'); return; }
 
       // Walk up DOM to find .furniture-item
       let item = e.target;
-      while (item && !item.classList.contains('furniture-item')) {
+      let depth = 0;
+      while (item && !item.classList.contains('furniture-item') && depth < 10) {
         item = item.parentElement;
+        depth++;
+        console.log('[DRAG] walking up, depth:', depth, 'item:', item ? item.className : 'null');
       }
-      if (!item) return;
+      if (!item) { console.log('[DRAG] rejected: no .furniture-item found'); return; }
+      console.log('[DRAG] found item:', item.className);
 
       // Don't start drag if resize is active
-      if (resizeState.active) return;
+      if (resizeState.active) { console.log('[DRAG] rejected: resizeState.active=true'); return; }
 
       e.preventDefault();
+      console.log('[DRAG] drag started!');
 
       // Deselect when starting drag
       if (selectedFurniture && selectedFurniture !== item) {
@@ -5808,11 +5815,14 @@
 
       document.addEventListener('mousemove', handleDragMove);
       document.addEventListener('mouseup', handleDragEnd);
+      document.addEventListener('touchmove', handleDragMove, { passive: false });
+      document.addEventListener('touchend', handleDragEnd);
     }
 
     function handleDragMove(e) {
-      if (!dragState.active) return;
+      if (!dragState.active) { console.log('[DRAG] move rejected: dragState.active=false'); return; }
       if (resizeState.active) return;
+      console.log('[DRAG] moving!');
       e.preventDefault();
 
       const touch = e.touches ? e.touches[0] : e;
