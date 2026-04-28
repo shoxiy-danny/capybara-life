@@ -5727,10 +5727,15 @@
     }
 
     function handleDragStart(e) {
+      console.log('[DRAG] handleDragStart called');
       // Prevent duplicate calls
       if (dragState.active) return;
 
-      const item = e.target.closest ? e.target.closest('.furniture-item') : (e.target.classList.contains('furniture-item') ? e.target : null);
+      // Walk up DOM to find .furniture-item
+      let item = e.target;
+      while (item && !item.classList.contains('furniture-item')) {
+        item = item.parentElement;
+      }
       if (!item) return;
 
       // Don't start drag if resize is active
