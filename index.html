@@ -3264,7 +3264,7 @@
         gold: 100,
         pet: { hunger: 80, mood: 70, health: 90 },
         inventory: [],
-        furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
+        furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
         currentLevel: 1,
         capyName: newCapyName
       };
@@ -3289,7 +3289,7 @@
           currentCapyImage: null,
           pet: { hunger: 80, mood: 90, health: 100 },
           inventory: [],
-          furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
+          furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
           currentLevel: 1,
           levelCorrect: 0,
           levelWrong: 0,
@@ -3301,10 +3301,6 @@
           gameState.capyName = currentUserId || '小可爱';
         }
         // Migration: ensure new fields exist on old saves
-        }
-        }
-        }
-        }
       }
       if (data.furniturePositions) {
         for (let i = 1; i <= 6; i++) {
@@ -3337,7 +3333,7 @@
       currentCapyImage: null, // Current capybara image from gallery
       pet: { hunger: 80, mood: 90, health: 100 },
       inventory: [],
-      furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } },
+      furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] },
       currentLevel: 1,
       levelCorrect: 0,
       levelWrong: 0
@@ -3362,7 +3358,7 @@
       }
       // Ensure gameState exists
       if (!gameState) {
-        gameState = { room: 1, capybaraLocation: 1, gold: 100, pet: { hunger: 80, mood: 70, health: 90 }, inventory: [], furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } } } };
+        gameState = { room: 1, capybaraLocation: 1, gold: 100, pet: { hunger: 80, mood: 70, health: 90 }, inventory: [], furniture: { room1: [], room2: [], room3: [], room4: [], room5: [], room6: [] } };
       }
       // Randomize capybara location on first load or if not set
       if (!gameState.capybaraLocation || gameState.capybaraLocation < 1 || gameState.capybaraLocation > 6) {
@@ -5932,28 +5928,28 @@
     // When selecting: find all images matching current state, pick random
     const CAPY_GALLERY = [
       // === IDLE / STANDING - HAPPY/JOYFUL (high mood, good hunger) ===
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful', 'calm'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['standing'], emotions: ['happy'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['standing'], emotions: ['happy'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_standing_joyful-smartt.png', tags: { actions: ['standing'], emotions: ['joyful', 'happy'], mood: ['high'], hunger: ['high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_standing_joyful-smartt.png', tags: { actions: ['standing'], emotions: ['joyful', 'happy'], mood: ['high'], hunger: ['high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_playing_joyful-smartt.png', tags: { actions: ['standing', 'playing'], emotions: ['joyful'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room5']},
-      { img: 'assets/capy_playing_joyful-smartt.png', tags: { actions: ['playing'], emotions: ['joyful'], mood: ['high'], hunger: ['medium', 'high'] }}, rooms: ['room5']},
-      { img: 'assets/capy_bathing_happy-smartt.png', tags: { actions: ['bathing'], emotions: ['happy', 'peaceful'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }}, rooms: ['room3']},
-      { img: 'assets/capy_bathing_happy-smartt.png', tags: { actions: ['bathing'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }}, rooms: ['room3']},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }}, rooms: ['room4']},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }}, rooms: ['room4']},
-      { img: 'assets/capy_drinking_happy-smartt.png', tags: { actions: ['drinking'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium'] }}, rooms: ['room4']},
-      { img: 'assets/capy_drinking_happy-smartt.png', tags: { actions: ['drinking'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium'] }}, rooms: ['room4']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful', 'calm'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['standing'], emotions: ['happy'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['standing'], emotions: ['happy'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_standing_joyful-smartt.png', tags: { actions: ['standing'], emotions: ['joyful', 'happy'], mood: ['high'], hunger: ['high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_standing_joyful-smartt.png', tags: { actions: ['standing'], emotions: ['joyful', 'happy'], mood: ['high'], hunger: ['high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_playing_joyful-smartt.png', tags: { actions: ['standing', 'playing'], emotions: ['joyful'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room5']},
+      { img: 'assets/capy_playing_joyful-smartt.png', tags: { actions: ['playing'], emotions: ['joyful'], mood: ['high'], hunger: ['medium', 'high'] }, rooms: ['room5']},
+      { img: 'assets/capy_bathing_happy-smartt.png', tags: { actions: ['bathing'], emotions: ['happy', 'peaceful'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }, rooms: ['room3']},
+      { img: 'assets/capy_bathing_happy-smartt.png', tags: { actions: ['bathing'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }, rooms: ['room3']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }, rooms: ['room4']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }, rooms: ['room4']},
+      { img: 'assets/capy_drinking_happy-smartt.png', tags: { actions: ['drinking'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium'] }, rooms: ['room4']},
+      { img: 'assets/capy_drinking_happy-smartt.png', tags: { actions: ['drinking'], emotions: ['happy'], mood: ['high', 'medium'], hunger: ['medium'] }, rooms: ['room4']},
 
       // === CALM / NEUTRAL (medium mood) ===
-      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral'], mood: ['medium'], hunger: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_lying_calm-smartt.png', tags: { actions: ['lying'], emotions: ['calm', 'peaceful'], mood: ['medium', 'high'], hunger: ['medium', 'high'] }}, rooms: ['room2']},
-      { img: 'assets/capy_lying_calm-smartt.png', tags: { actions: ['lying'], emotions: ['calm'], mood: ['medium'], hunger: ['medium', 'high'] }}, rooms: ['room2']},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['peaceful', 'calm'], mood: ['medium', 'high'], hunger: ['medium', 'high'], health: ['medium', 'high'] }}, rooms: ['room2']},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['peaceful'], mood: ['medium', 'high'], health: ['medium', 'high'] }}, rooms: ['room2']},
+      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral'], mood: ['medium'], hunger: ['medium', 'high'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_lying_calm-smartt.png', tags: { actions: ['lying'], emotions: ['calm', 'peaceful'], mood: ['medium', 'high'], hunger: ['medium', 'high'] }, rooms: ['room2']},
+      { img: 'assets/capy_lying_calm-smartt.png', tags: { actions: ['lying'], emotions: ['calm'], mood: ['medium'], hunger: ['medium', 'high'] }, rooms: ['room2']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['peaceful', 'calm'], mood: ['medium', 'high'], hunger: ['medium', 'high'], health: ['medium', 'high'] }, rooms: ['room2']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['peaceful'], mood: ['medium', 'high'], health: ['medium', 'high'] }, rooms: ['room2']},
 
       // === SAD (low mood) ===
       { img: 'assets/capy_idle_sad-smartt.png', tags: { actions: ['idle'], emotions: ['sad'], mood: ['low'], hunger: ['medium', 'low'] }},
@@ -5967,55 +5963,55 @@
       { img: 'assets/capy_idle_sad-smartt.png', tags: { actions: ['idle'], emotions: ['sad', 'crying'], mood: ['very_low', 'low'], hunger: ['low'] }},
 
       // === SLEEPY (low health) ===
-      { img: 'assets/capy_lying_sleepy-smartt.png', tags: { actions: ['lying', 'sleeping'], emotions: ['sleepy', 'tired'], mood: ['medium', 'low'], hunger: ['medium', 'low'], health: ['low'] }}, rooms: ['room2']},
-      { img: 'assets/capy_lying_sleepy-smartt.png', tags: { actions: ['lying', 'sleeping'], emotions: ['sleepy'], mood: ['low', 'medium'], health: ['low'] }}, rooms: ['room2']},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['sleepy', 'peaceful'], mood: ['low', 'medium'], health: ['low', 'medium'] }}, rooms: ['room2']},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['sleepy', 'peaceful'], mood: ['low', 'medium'], health: ['low'] }}, rooms: ['room2']},
+      { img: 'assets/capy_lying_sleepy-smartt.png', tags: { actions: ['lying', 'sleeping'], emotions: ['sleepy', 'tired'], mood: ['medium', 'low'], hunger: ['medium', 'low'], health: ['low'] }, rooms: ['room2']},
+      { img: 'assets/capy_lying_sleepy-smartt.png', tags: { actions: ['lying', 'sleeping'], emotions: ['sleepy'], mood: ['low', 'medium'], health: ['low'] }, rooms: ['room2']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['sleepy', 'peaceful'], mood: ['low', 'medium'], health: ['low', 'medium'] }, rooms: ['room2']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['sleepy', 'peaceful'], mood: ['low', 'medium'], health: ['low'] }, rooms: ['room2']},
 
       // === SICK (low health) ===
       { img: 'assets/capy_idle_sick-smartt.png', tags: { actions: ['idle'], emotions: ['sick'], mood: ['low', 'medium'], hunger: ['low', 'medium'], health: ['very_low', 'low'] }},
       { img: 'assets/capy_idle_sick-smartt.png', tags: { actions: ['idle'], emotions: ['sick'], mood: ['low'], hunger: ['low'], health: ['very_low'] }},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['idle'], emotions: ['sick', 'tired'], mood: ['low'], health: ['very_low', 'low'] }}, rooms: ['room2']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['idle'], emotions: ['sick', 'tired'], mood: ['low'], health: ['very_low', 'low'] }, rooms: ['room2']},
 
       // === ANGRY (low hunger) ===
       { img: 'assets/capy_standing_angry-smartt.png', tags: { actions: ['standing', 'idle'], emotions: ['angry'], mood: ['medium', 'low'], hunger: ['very_low'] }},
       { img: 'assets/capy_standing_angry-smartt.png', tags: { actions: ['standing'], emotions: ['angry'], hunger: ['very_low'] }},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['idle'], emotions: ['angry', 'frustrated'], hunger: ['very_low'] }}, rooms: ['room4']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['idle'], emotions: ['angry', 'frustrated'], hunger: ['very_low'] }, rooms: ['room4']},
 
       // === SCARED (very low health) ===
       { img: 'assets/capy_standing_scared-smartt.png', tags: { actions: ['standing'], emotions: ['scared', 'worried'], mood: ['low', 'very_low'], health: ['very_low'] }},
       { img: 'assets/capy_standing_scared-smartt.png', tags: { actions: ['standing'], emotions: ['scared'], health: ['very_low'] }},
 
       // === DETAILED / VARIANT ===
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['high', 'medium'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['high'], hunger: ['high'] }}, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['high', 'medium'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['high'], hunger: ['high'] }, rooms: ['room6', 'room1']},
       { img: 'assets/capy_idle_sad-smartt.png', tags: { actions: ['idle'], emotions: ['sad'], mood: ['low'], hunger: ['medium', 'low'] }},
       { img: 'assets/capy_idle_sad-smartt.png', tags: { actions: ['idle'], emotions: ['sad', 'crying'], mood: ['very_low', 'low'] }},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['sleepy', 'peaceful'], mood: ['medium', 'low'], health: ['low'] }}, rooms: ['room2']},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }}, rooms: ['room4']},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy'], mood: ['high'], hunger: ['low'] }}, rooms: ['room4']},
-      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['idle', 'standing'], emotions: ['happy'], mood: ['high', 'medium'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], hunger: ['low', 'medium'] }}, rooms: ['room4']},
-      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['sleepy', 'peaceful'], health: ['low', 'medium'] }}, rooms: ['room2']},
-      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral', 'calm'], mood: ['medium'] }}, rooms: ['room6', 'room1']},
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['medium', 'high'] }}, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['sleepy', 'peaceful'], mood: ['medium', 'low'], health: ['low'] }, rooms: ['room2']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }, rooms: ['room4']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy'], mood: ['high'], hunger: ['low'] }, rooms: ['room4']},
+      { img: 'assets/capy_standing_happy-smartt.png', tags: { actions: ['idle', 'standing'], emotions: ['happy'], mood: ['high', 'medium'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_eating_happy-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], hunger: ['low', 'medium'] }, rooms: ['room4']},
+      { img: 'assets/capy_sleeping_peaceful-smartt.png', tags: { actions: ['sleeping'], emotions: ['sleepy', 'peaceful'], health: ['low', 'medium'] }, rooms: ['room2']},
+      { img: 'assets/capy_idle_neutral-smartt.png', tags: { actions: ['idle'], emotions: ['neutral', 'calm'], mood: ['medium'] }, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['medium', 'high'] }, rooms: ['room6', 'room1']},
       // === NEW GENERATED (improved prompt with posture) ===
       { img: 'assets/idle_scared-smartt.png', tags: { actions: ['idle'], emotions: ['scared'], mood: ['very_low'], health: ['very_low'] }},
       { img: 'assets/idle_angry-smartt.png', tags: { actions: ['idle'], emotions: ['angry'], hunger: ['very_low'] }},
-      { img: 'assets/drinking_neutral-smartt.png', tags: { actions: ['drinking'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium'] }}, rooms: ['room4']},
-      { img: 'assets/bathing_calm-smartt.png', tags: { actions: ['bathing'], emotions: ['calm', 'peaceful'], mood: ['medium', 'high'], health: ['medium', 'high'] }}, rooms: ['room3']},
-      { img: 'assets/playing_happy-smartt.png', tags: { actions: ['playing'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }}, rooms: ['room5']},
-      { img: 'assets/standing_neutral-smartt.png', tags: { actions: ['standing'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium', 'high'] }}, rooms: ['room6']},
+      { img: 'assets/drinking_neutral-smartt.png', tags: { actions: ['drinking'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium'] }, rooms: ['room4']},
+      { img: 'assets/bathing_calm-smartt.png', tags: { actions: ['bathing'], emotions: ['calm', 'peaceful'], mood: ['medium', 'high'], health: ['medium', 'high'] }, rooms: ['room3']},
+      { img: 'assets/playing_happy-smartt.png', tags: { actions: ['playing'], emotions: ['happy', 'joyful'], mood: ['high', 'medium'], hunger: ['medium', 'high'] }, rooms: ['room5']},
+      { img: 'assets/standing_neutral-smartt.png', tags: { actions: ['standing'], emotions: ['neutral', 'calm'], mood: ['medium'], hunger: ['medium', 'high'] }, rooms: ['room6']},
       { img: 'assets/standing_sad-smartt.png', tags: { actions: ['standing'], emotions: ['sad'], mood: ['low'], hunger: ['medium', 'low'] }},
       { img: 'assets/scared_worried-smartt.png', tags: { actions: ['standing'], emotions: ['scared', 'worried'], mood: ['very_low', 'low'], health: ['very_low'] }},
       // === NEW GENERATED (specific action poses) ===
       { img: 'assets/sad_leaf-smartt.png', tags: { actions: ['idle'], emotions: ['sad', 'melancholic'], mood: ['low'], hunger: ['medium', 'low'] }},
       { img: 'assets/crying_watermelon-smartt.png', tags: { actions: ['idle'], emotions: ['crying', 'sad'], mood: ['very_low'], hunger: ['low', 'medium'] }},
       { img: 'assets/capy_idle_sick-smartt.png', tags: { actions: ['idle'], emotions: ['sick', 'tired'], mood: ['low', 'medium'], health: ['very_low', 'low'] }},
-      { img: 'assets/sleeping_blanket-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['peaceful', 'calm'], mood: ['medium', 'high'], health: ['medium', 'high'] }}, rooms: ['room2']},
-      { img: 'assets/eating_carrot-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }}, rooms: ['room4']},
+      { img: 'assets/sleeping_blanket-smartt.png', tags: { actions: ['sleeping', 'lying'], emotions: ['peaceful', 'calm'], mood: ['medium', 'high'], health: ['medium', 'high'] }, rooms: ['room2']},
+      { img: 'assets/eating_carrot-smartt.png', tags: { actions: ['eating'], emotions: ['happy', 'content'], mood: ['high', 'medium'], hunger: ['low', 'medium'] }, rooms: ['room4']},
       // Fallback
-      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['high', 'medium', 'low'], hunger: ['high', 'medium', 'low'], health: ['high', 'medium', 'low'] }}, rooms: ['room6', 'room1']},
+      { img: 'assets/capy_idle_happy-smartt.png', tags: { actions: ['idle'], emotions: ['happy'], mood: ['high', 'medium', 'low'], hunger: ['high', 'medium', 'low'], health: ['high', 'medium', 'low'] }, rooms: ['room6', 'room1']},
     ];
 
     // Helper: get level from value
@@ -6527,14 +6523,6 @@
     }
 
     // ============ PET INTERACTIONS ============
-
-      // Daily task tracking
-
-      updateStatusBars();
-      updateCapybaraMood();
-      saveGame();
-    }
-
 
     // ============ PERSISTENCE ============
     function saveGame() {
