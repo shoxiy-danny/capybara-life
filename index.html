@@ -1126,6 +1126,7 @@
       pointer-events: none;
       display: none;
       z-index: 999;
+      transform: translate(-50%, -50%);
     }
     .drop-indicator.visible {
       display: block;
@@ -5903,8 +5904,8 @@
       // Update indicator position
       const indicator = document.getElementById(`drop-indicator-${dragState.room}`);
       if (indicator) {
-        indicator.style.left = (newX * gridRect.width / 100 - 25) + 'px';
-        indicator.style.top = (gridRect.height - newY * gridRect.height / 100 - 25) + 'px';
+        indicator.style.left = (newX * gridRect.width / 100) + 'px';
+        indicator.style.top = (gridRect.height - newY * gridRect.height / 100) + 'px';
       }
     }
 
