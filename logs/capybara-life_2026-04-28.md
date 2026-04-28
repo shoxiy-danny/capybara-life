@@ -6,3 +6,19 @@
 [2026-04-28 00:33:35] 完成 宠物交互按钮（2.1） | 新增抚摸/遛弯/陪伴按钮，带冷却机制
 [2026-04-28 00:33:35] 完成 家具点击动画（4.1） | FURNITURE 数据加 animation 字段，点击触发电视闪烁/音波/震动等动画
 [2026-04-28 00:33:35] 完成 家具解锁动效（4.2） | 增强 buyFurniture() 购买后入场动画链：光效→弹性放大→金币飞减动画
+[2026-04-28 09:50:44] 开始 更新3.1-barcode-pay.md | 根据新API文档更新条码支付接口文档
+[2026-04-28 09:50:44] 开始 更新3.4-order-query.md | 根据新API文档更新订单查询文档
+[2026-04-28 09:50:44] 开始 更新3.3-jsapi-pay.md | 根据新API文档更新公众号/服务窗统一下单文档
+[2026-04-28 09:50:44] 开始 更新3.2-qrcode-pay.md | 根据新API文档更新主扫统一下单文档
+[2026-04-28 09:51:34] 完成 更新3.1-barcode-pay.md | 根据新API文档更新条码支付接口文档
+[2026-04-28 09:52:04] 完成 更新3.2-qrcode-pay.md | 根据新API文档更新主扫统一下单文档
+[2026-04-28 09:52:21] 完成 更新3.3-jsapi-pay.md | 根据新API文档更新公众号/服务窗统一下单文档
+[2026-04-28 09:52:21] 开始 更新3.5-3.10文档 | 更新3.5-notify.md, 3.6-refund.md, 3.7-close.md, 3.8-revoke.md, 3.9-refund-query.md, 3.10-history-query.md
+[2026-04-28 09:53:54] 开始 更新3.11-3.15和error-codes文档 | 更新3.11-auth-code.md, 3.12-servicer-openid.md, 3.13-delegate-pay.md, 3.14-delegate-query.md, 3.15-fee-push.md, error-codes.md
+[2026-04-28 09:54:55] 完成 更新3.5-3.10文档 | 更新3.5-notify.md, 3.6-refund.md, 3.7-close.md, 3.8-revoke.md, 3.9-refund-query.md, 3.10-history-query.md
+[2026-04-28 09:54:55] 完成 更新3.11-3.15和error-codes文档 | 更新3.11-auth-code.md, 3.12-servicer-openid.md, 3.13-delegate-pay.md, 3.14-delegate-query.md, 3.15-fee-push.md, error-codes.md
+[2026-04-28 09:54:55] 开始 生成更新报告 | 生成富友支付API文档更新报告
+[2026-04-28 09:55:50] 完成 生成更新报告 | 生成富友支付API文档更新报告
+[2026-04-28 10:07:42] 完成 更新3.4-order-query.md | 根据新API文档更新订单查询文档
+[2026-04-28 14:03:31] 开始 房间专属动作 - CAPY_GALLERY加房间标签 | 给每个CAPY_GALLERY条目加rooms标签，标记适合的房间
+[2026-04-28 14:06:04] 完成 房间专属动作 - CAPY_GALLERY加房间标签 | 给每个CAPY_GALLERY条目加rooms标签，标记适合的房间
