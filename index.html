@@ -5555,11 +5555,64 @@
     function addDragEvents(item) {
       // Mouse events
       item.addEventListener('mousedown', handleDragStart);
-      // Touch events for mobile
-      item.addEventListener('touchstart', handleDragStart, { passive: false });
+      // Touch events for mobile - use a separate handler with threshold
+      item.addEventListener('touchstart', handleTouchStart, { passive: false });
+      item.addEventListener('touchmove', handleTouchMove, { passive: false });
+      item.addEventListener('touchend', handleTouchEnd);
 
       // Click to select
       item.addEventListener('click', handleFurnitureSelect);
+    }
+
+    // Touch handling state
+    let touchState = {
+      startX: 0,
+      startY: 0,
+      item: null,
+      dragStarted: false
+    };
+
+    function handleTouchStart(e) {
+      const touch = e.touches[0];
+      touchState.startX = touch.clientX;
+      touchState.startY = touch.clientY;
+
+      // Walk up to find .furniture-item
+      let item = e.target;
+      let depth = 0;
+      while (item && !item.classList.contains('furniture-item') && depth < 10) {
+        item = item.parentElement;
+        depth++;
+      }
+      touchState.item = item;
+      touchState.dragStarted = false;
+    }
+
+    function handleTouchMove(e) {
+      if (!touchState.item || touchState.dragStarted) return;
+
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - touchState.startX);
+      const dy = Math.abs(touch.clientY - touchState.startY);
+
+      // If moved more than 10px, start actual drag
+      if (dx > 10 || dy > 10) {
+        touchState.dragStarted = true;
+        // Create a fake mousedown event to reuse handleDragStart
+        const fakeEvent = {
+          target: touchState.item,
+          preventDefault: () => e.preventDefault(),
+          touches: [{ clientX: touch.clientX, clientY: touch.clientY }]
+        };
+        handleDragStart(fakeEvent);
+      }
+    }
+
+    function handleTouchEnd(e) {
+      // If drag wasn't started, let the click event handle selection
+      // (click will fire after touchend)
+      touchState.item = null;
+      touchState.dragStarted = false;
     }
 
     function handleFurnitureSelect(e) {
